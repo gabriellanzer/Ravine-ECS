@@ -16,7 +16,7 @@ class ComponentsManager
 {
 private:
 	template<class TComponent>
-	static ComponentsList* getOffsetsList()
+	static ComponentsList* getRelativityList()
 	{
 		static ComponentsList offsetsList(sizeof(TComponent));
 		return &offsetsList;
@@ -24,15 +24,15 @@ private:
 
 	//Sets offset for the relative ComponentTypes
 	template<class TComponent, class TOtherComponent>
-	static size_t* createOffset()
+	static size_t* createRelation()
 	{
 		size_t* offset = getRelativeOffset<TComponent, TOtherComponent>();
 
 		//No offset found
 		if (offset == nullptr)
 		{
-			ComponentsList* offsetsList = getOffsetsList<TComponent>();
-			offset = offsetsList->linkRelativeOffset(getOffsetsList<TOtherComponent>());
+			ComponentsList* relativityList = getRelativityList<TComponent>();
+			offset = relativityList->linkRelativeOffset(getRelativityList<TOtherComponent>());
 
 			//Unless of same type, offset is current array size
 			if (static_cast<bool>(!std::is_same<TComponent, TOtherComponent>::value))
@@ -41,15 +41,24 @@ private:
 			}
 		}
 
+		size_t* size = getRelativeSize<TComponent, TOtherComponent>();
+
+		//No size found
+		if (size == nullptr)
+		{
+			ComponentsList* relativityList = getRelativityList<TComponent>();
+			size = relativityList->linkRelativeSize(getRelativityList<TOtherComponent>());
+		}
+
 		return offset;
 	}
 
 	//Sets offset for the relative ComponentTypes
 	template<class TComponent, class... TComponents>
-	static array<size_t*, sizeof...(TComponents)> createComponentOffset()
+	static array<size_t*, sizeof...(TComponents)> createComponentRelation()
 	{
 		return {
-			createOffset<TComponent, TComponents>()...
+			createRelation<TComponent, TComponents>()...
 		};
 	}
 
@@ -57,8 +66,8 @@ private:
 	template<class TComponent, class TOtherComponent>
 	static size_t* getRelativeOffset()
 	{
-		ComponentsList* list = getOffsetsList<TComponent>();
-		ComponentsList* otherList = getOffsetsList<TOtherComponent>();
+		ComponentsList* list = getRelativityList<TComponent>();
+		ComponentsList* otherList = getRelativityList<TOtherComponent>();
 		return list->getRelativeOffset(otherList);
 	}
 
@@ -66,7 +75,7 @@ private:
 	template<class TComponent>
 	static size_t* getComponentOffset()
 	{
-		ComponentsList* list = getOffsetsList<TComponent>();
+		ComponentsList* list = getRelativityList<TComponent>();
 		return list->getRelativeOffset(list);
 	}
 
@@ -92,36 +101,6 @@ private:
 		return offset;
 	}
 
-	//Final Getting call
-	template<class TComponent>
-	static size_t getComponentSize()
-	{
-		return getArray<TComponent>(0).size();
-	}
-
-	//Chosing correct size from pair's comparation
-	template<class TComponent, class TOtherComponent, class... TComponents>
-	static size_t getComponentSize()
-	{
-		//Ignore size with same type unless it is the only component
-		if (static_cast<bool>(std::is_same<TComponent, TOtherComponent>::value))
-		{
-			//Only this component left
-			if (sizeof...(TComponents) == 0)
-			{
-				return getArray<TComponent>().size();
-			}
-
-			return getComponentSize<TComponent, TComponents...>();
-		}
-		vector<TComponent>& arr = getArray<TComponent>();
-		const size_t size = arr.size() - *getRelativeOffset<TComponent, TOtherComponent>();
-		const size_t otherSize = getComponentSize<TComponent, TComponents...>();
-		if (otherSize < size)
-			return otherSize;
-		return size;
-	}
-
 	template<class TComponent>
 	static void increaseOffsets(const size_t startPos, const size_t count = 1)
 	{
@@ -133,20 +112,75 @@ private:
 	{
 		if (!static_cast<bool>(std::is_same<TComponent, TOtherComponent>::value))
 		{
-			ComponentsList* list = getOffsetsList<TComponent>();
-			ComponentsList* otherList = getOffsetsList<TOtherComponent>();
+			ComponentsList* list = getRelativityList<TComponent>();
+			ComponentsList* otherList = getRelativityList<TOtherComponent>();
 			list->incrementRelativeOffset(otherList, startPos, count);
 		}
 		increaseOffsets<TComponent, TComponents...>(startPos, count);
+	}
+
+	//Unique size for each type combination
+	template<class TComponent, class TOtherComponent>
+	static size_t* getRelativeSize()
+	{
+		ComponentsList* list = getRelativityList<TComponent>();
+		ComponentsList* otherList = getRelativityList<TOtherComponent>();
+		return list->getRelativeSize(otherList);
+	}
+	
+	//Final Getting call
+	template<class TComponent>
+	static size_t* getComponentSize()
+	{
+		ComponentsList* list = getRelativityList<TComponent>();
+		return list->getRelativeSize(list);
+	}
+
+	//Choosing correct size from pair's comparision
+	template<class TComponent, class TOtherComponent, class... TComponents>
+	static size_t* getComponentSize()
+	{
+		//Ignore size with same type unless it is the only component
+		if (static_cast<bool>(std::is_same<TComponent, TOtherComponent>::value))
+		{
+			//Only this component left
+			if (sizeof...(TComponents) == 0)
+			{
+				return getComponentSize<TComponent>();
+			}
+
+			return getComponentSize<TComponent, TComponents...>();
+		}
+		size_t* size = getRelativeSize<TComponent, TOtherComponent>();
+		size_t* otherSize = getComponentSize<TComponent, TComponents...>();
+		if (otherSize[0] < size[0])
+			return otherSize;
+		return size;
+	}
+
+	template<class TComponent>
+	static void increaseSizes(const size_t startPos = 0, const size_t count = 1)
+	{
+
+	}
+
+	template<class TComponent, class TOtherComponent, class... TComponents>
+	static void increaseSizes(const size_t startPos = 0, const size_t count = 1)
+	{
+		ComponentsList* list = getRelativityList<TComponent>();
+		ComponentsList* otherList = getRelativityList<TOtherComponent>();
+		list->incrementRelativeSize(otherList, startPos, count);
+		increaseSizes<TComponent, TComponents...>(startPos, count);
 	}
 
 	//Sets offset for the relative ComponentTypes
 	template<class TComponent, class... TComponents>
 	static void createComponent(TComponent& arg)
 	{
-		createComponentOffset<TComponent, TComponents...>();
+		createComponentRelation<TComponent, TComponents...>();
 		size_t* offset = getComponentOffset<TComponent, TComponents...>();
 		increaseOffsets<TComponent, TComponents...>(*offset);
+		increaseSizes<TComponent, TComponents...>();
 		vector<TComponent>& compArray = getArray<TComponent>();
 		compArray.insert(compArray.begin() + *offset, arg);
 	}
@@ -156,7 +190,7 @@ public:
 	static vector<TComponent>& getArray(size_t allocSize = 1024)
 	{
 		static vector<TComponent> compList;
-		compList.reserve(1000);
+		compList.reserve(allocSize);
 		return compList;
 	}
 
@@ -183,7 +217,7 @@ public:
 	static array<size_t, sizeof...(TComponents)> getSizes()
 	{
 		return {
-			getComponentSize<TComponents, TComponents...>()...
+			*getComponentSize<TComponents, TComponents...>()...
 		};
 	}
 };

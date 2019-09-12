@@ -19,14 +19,14 @@ private:
 
 	}
 
-	template<int IT, class TComponent, class... TArgs>
+	template<int It, class TComponent, class... TArgs>
 	constexpr void getComponent(tuple<TComponents* ...>& componentLists, array<size_t, sizeof...(TComponents)> offsets)
 	{
 		//Get Component List from manager for TComponent type
 		vector<TComponent>& componentList = ComponentsManager::getArray<TComponent>();
-		get<IT>(componentLists) = componentList.data() + get<IT>(offsets);
+		get<It>(componentLists) = componentList.data() + get<It>(offsets);
 
-		getComponent<IT + 1, TArgs...>(componentLists, offsets);
+		getComponent<It + 1, TArgs...>(componentLists, offsets);
 	}
 
 	template<int... S>

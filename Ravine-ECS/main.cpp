@@ -17,9 +17,9 @@ int main(int argc, char** argv)
 	ComponentsManager::createComponents<PositionComponent>({});
 	ComponentsManager::createComponents<VelocityComponent>({});
 	ComponentsManager::createComponents<VelocityComponent>({});
-	ComponentsManager::createComponents(PositionComponent{ 2,2,2 }, VelocityComponent{ 0,1,0 });
-	ComponentsManager::createComponents<VelocityComponent, PositionComponent>({ 1,2,0 }, { 0,0,3 });
-	ComponentsManager::createComponents(PositionComponent{ 0,6,0 }, VelocityComponent{ 1,0,0 });
+	ComponentsManager::createComponents(PositionComponent{ 1,1,1 }, VelocityComponent{ 0,0,0 });
+	ComponentsManager::createComponents<VelocityComponent, PositionComponent>({ 0,0,0 }, { 2,2,2 });
+	ComponentsManager::createComponents(PositionComponent{ 3,3,3 }, VelocityComponent{ 0,0,0 });
 	ComponentsManager::createComponents<VelocityComponent>({});
 	ComponentsManager::createComponents<PositionComponent>({});
 
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
 		//Update Systems
 		testSystem->update(dt);
-		gravitySystem->update(dt);
+		//gravitySystem->update(dt);
 		boundingSystem->update(dt);
 
 		//Update Delta-time

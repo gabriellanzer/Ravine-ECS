@@ -8,5 +8,5 @@ void MovementSystem::update(double deltaTime, size_t size, VelocityComponent* ve
 		pos[i] += vel[i] * deltaTime;
 		std::cout << "pos " << pos[i] << "; vel " << vel[i] << std::endl;
 	}
-	std::cout << std::endl;
+	std::cout << size << std::endl;
 }

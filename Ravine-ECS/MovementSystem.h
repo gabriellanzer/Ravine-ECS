@@ -9,5 +9,5 @@ using std::endl;
 
 class MovementSystem : public BaseSystem<VelocityComponent, PositionComponent>
 {
-	virtual void update(double deltaTime, size_t size, VelocityComponent* vel, PositionComponent* pos) override;
+	void update(double deltaTime, size_t size, VelocityComponent* vel, PositionComponent* pos) override;
 };

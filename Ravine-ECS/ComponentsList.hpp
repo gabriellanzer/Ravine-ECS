@@ -7,6 +7,7 @@ using std::unordered_map;
 class ComponentsList
 {
 	unordered_map<ComponentsList*, size_t*> relativeOffsets;
+	unordered_map<ComponentsList*, size_t*> relativeSizes;
 	const uint32_t dataTypeSize;
 
 public:
@@ -27,6 +28,12 @@ public:
 		return res.first->second;
 	}
 
+	size_t* linkRelativeSize(ComponentsList* relativeList)
+	{
+		const auto res = relativeSizes.emplace(relativeList, new size_t(0));
+		return res.first->second;
+	}
+
 	size_t* getRelativeOffset(ComponentsList* relativeList)
 	{
 		const auto it = relativeOffsets.find(relativeList);
@@ -37,7 +44,16 @@ public:
 		return nullptr;
 	}
 
-	//Increment all offsets starting a given pos
+	size_t* getRelativeSize(ComponentsList* relativeList)
+	{
+		const auto it = relativeSizes.find(relativeList);
+		if (it != relativeSizes.end())
+		{
+			return it->second;
+		}
+		return nullptr;
+	}
+
 	void incrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
 	{
 		const auto it = relativeOffsets.find(relativeList);
@@ -50,7 +66,19 @@ public:
 		}
 	}
 
-	//Decrement all offsets starting a given pos
+	void incrementRelativeSize(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
+	{
+		const auto itOffset = relativeOffsets.find(relativeList);
+		const auto itSize = relativeSizes.find(relativeList);
+		if (itOffset != relativeOffsets.end())
+		{
+			if (*itOffset->second >= startPos)
+			{
+				*itSize->second += count;
+			}
+		}
+	}
+
 	void decrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
 	{
 		const auto it = relativeOffsets.find(relativeList);
@@ -63,6 +91,17 @@ public:
 		}
 	}
 
+	void decrementRelativeSizes(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
+	{
+		const auto it = relativeSizes.find(relativeList);
+		if (it != relativeSizes.end())
+		{
+			if (*it->second > startPos)
+			{
+				*it->second -= count;
+			}
+		}
+	}
 };
 
 #endif
