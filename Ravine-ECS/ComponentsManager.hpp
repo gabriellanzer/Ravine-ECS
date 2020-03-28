@@ -3,7 +3,6 @@
 #include <array>
 #include <type_traits>
 #include <unordered_set>
-#include "TemplateIndexPack.h"
 #include "ComponentsList.hpp"
 
 using std::vector;
@@ -119,6 +118,13 @@ private:
 		increaseOffsets<TComponent, TComponents...>(startPos, count);
 	}
 
+	template<class TComponent>
+	static void increaseAllOffsets(const size_t startPos, const size_t count = 1)
+	{
+		ComponentsList* list = getRelativityList<TComponent>();
+		list->incrementRelativeOffsets(startPos, count);
+	}
+
 	//Unique size for each type combination
 	template<class TComponent, class TOtherComponent>
 	static size_t* getRelativeSize()
@@ -179,10 +185,11 @@ private:
 	{
 		createComponentRelation<TComponent, TComponents...>();
 		size_t* offset = getComponentOffset<TComponent, TComponents...>();
-		increaseOffsets<TComponent, TComponents...>(*offset);
+		const size_t size = *getComponentSize<TComponent, TComponents...>();
+		increaseAllOffsets<TComponent>(*offset + size);
 		increaseSizes<TComponent, TComponents...>();
 		vector<TComponent>& compArray = getArray<TComponent>();
-		compArray.insert(compArray.begin() + *offset, arg);
+		compArray.insert(compArray.begin() + *offset + size, arg);
 	}
 
 public:

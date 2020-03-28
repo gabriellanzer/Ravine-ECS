@@ -1,5 +1,4 @@
 #include <chrono>
-#include <thread>
 #include <iostream>
 #include "ComponentsManager.hpp"
 #include "MovementSystem.h"
@@ -9,10 +8,10 @@
 int main(int argc, char** argv)
 {
 	ISystem* gravitySystem = new GravitySystem();
-	ISystem* testSystem = new MovementSystem();
+	ISystem* movementSystem = new MovementSystem();
 	ISystem* boundingSystem = new BoundingSystem();
 	cout.setf(std::ios::fixed, std::ios::floatfield);
-	cout.precision(4);
+	cout.precision(9);
 
 	ComponentsManager::createComponents<PositionComponent>({});
 	ComponentsManager::createComponents<VelocityComponent>({});
@@ -25,20 +24,21 @@ int main(int argc, char** argv)
 
 	while (true)
 	{
-		system("cls");
+		//system("cls");
 
 		//Start Delta-time
 		static double dt = 0.03;
 		static auto mStartTime = std::chrono::system_clock::now();
 
 		//Update Systems
-		testSystem->update(dt);
-		//gravitySystem->update(dt);
+		movementSystem->update(dt);
+		gravitySystem->update(dt);
 		boundingSystem->update(dt);
 
 		//Update Delta-time
 		static auto mEndTime = std::chrono::system_clock::now();
-		dt = std::chrono::duration_cast<std::chrono::microseconds>(mEndTime - mStartTime).count() * 1e-6;
+		dt = std::chrono::duration_cast<std::chrono::nanoseconds>(mEndTime - mStartTime).count() * 1e-9;
+		cout << "Delta-time:" << dt << endl;
 	}
 	system("pause");
 	return 0;

@@ -66,6 +66,17 @@ public:
 		}
 	}
 
+	void incrementRelativeOffsets(const size_t startPos, const size_t count = 1)
+	{
+		for (const auto it : relativeOffsets)
+		{
+			if (*it.second > startPos)
+			{
+				*it.second += count;
+			}
+		}
+	}
+
 	void incrementRelativeSize(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
 	{
 		const auto itOffset = relativeOffsets.find(relativeList);
@@ -87,6 +98,17 @@ public:
 			if (*it->second > startPos)
 			{
 				*it->second -= count;
+			}
+		}
+	}
+
+	void decreaseRelativeOffsets(const size_t startPos, const size_t count = 1)
+	{
+		for (const auto it : relativeOffsets)
+		{
+			if (*it.second > startPos)
+			{
+				*it.second -= count;
 			}
 		}
 	}

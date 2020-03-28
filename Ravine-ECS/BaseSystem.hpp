@@ -13,7 +13,7 @@ class BaseSystem : public ISystem
 private:
 	tuple<TComponents* ...> componentLists;
 
-	template<int IT>
+	template<int It>
 	constexpr void getComponent(tuple<TComponents* ...>& componentLists, array<size_t, sizeof...(TComponents)> offsets)
 	{
 
