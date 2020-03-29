@@ -1,12 +1,12 @@
 #include "MovementSystem.h"
 #include <iostream>
 
-void MovementSystem::update(const double deltaTime, const size_t size, VelocityComponent* vel, PositionComponent* pos)
+void MovementSystem::update(const double deltaTime, const size_t size, VelocityComponent *vel, PositionComponent *pos)
 {
-	for (size_t i = 0; i < size; i++)
-	{
-		pos[i] += vel[i] * deltaTime;
-		//std::cout << "pos " << pos[i] << "; vel " << vel[i] << std::endl;
-	}
-	//system("cls");
+    for (size_t i = 0; i < size; i++)
+    {
+        pos[i] += vel[i] * deltaTime;
+        // std::cout << "pos " << pos[i] << "; vel " << vel[i] << std::endl;
+    }
+    // system("cls");
 }

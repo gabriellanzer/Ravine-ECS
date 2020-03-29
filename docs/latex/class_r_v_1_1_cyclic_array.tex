@@ -1,0 +1,75 @@
+\hypertarget{class_r_v_1_1_cyclic_array}{}\doxysection{RV\+::Cyclic\+Array$<$ T\+Component $>$ Class Template Reference}
+\label{class_r_v_1_1_cyclic_array}\index{RV::CyclicArray$<$ TComponent $>$@{RV::CyclicArray$<$ TComponent $>$}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a1170648fc20d0c5604aeead9341c321c}\label{class_r_v_1_1_cyclic_array_a1170648fc20d0c5604aeead9341c321c}} 
+{\bfseries Cyclic\+Array} (const int32\+\_\+t capacity)
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a6e2b585945b3ca029d158b3da22e1429}\label{class_r_v_1_1_cyclic_array_a6e2b585945b3ca029d158b3da22e1429}} 
+constexpr void {\bfseries reallocate} (int32\+\_\+t new\+Capacity=0)
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a647bc221295e6e21012b130531cb9367}\label{class_r_v_1_1_cyclic_array_a647bc221295e6e21012b130531cb9367}} 
+int32\+\_\+t {\bfseries add\+Component} (const T\+Component $\ast$comps, const uint32\+\_\+t count)
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a6ffde8e69256e2e01109a4d0892bef28}\label{class_r_v_1_1_cyclic_array_a6ffde8e69256e2e01109a4d0892bef28}} 
+int32\+\_\+t {\bfseries add\+Component} (const T\+Component \&comp)
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a3bcf5240f04c0f19aa6f8678deecb10c}\label{class_r_v_1_1_cyclic_array_a3bcf5240f04c0f19aa6f8678deecb10c}} 
+constexpr const T\+Component $\ast$ {\bfseries get\+Data} () const
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_acf08a0f414726cd2cb88ddc7daa39413}\label{class_r_v_1_1_cyclic_array_acf08a0f414726cd2cb88ddc7daa39413}} 
+constexpr const T\+Component $\ast$ {\bfseries get\+Data} (int32\+\_\+t \&size) const
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_ab4d9b7dad21bdf25988f25423ee4d6b9}\label{class_r_v_1_1_cyclic_array_ab4d9b7dad21bdf25988f25423ee4d6b9}} 
+constexpr int32\+\_\+t {\bfseries get\+Size} () const
+\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a489e96e014daa0efdca89de15859951b}\label{class_r_v_1_1_cyclic_array_a489e96e014daa0efdca89de15859951b}} 
+constexpr void {\bfseries roll\+Clockwise} (const int32\+\_\+t count)
+\item 
+constexpr int32\+\_\+t \mbox{\hyperlink{class_r_v_1_1_cyclic_array_a1e63821419c2148525d485c3ea6d3778}{shift\+Clockwise}} (int32\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Shifts the components in a clockwise manner. Doesn\textquotesingle{}t move base ptr, doesn\textquotesingle{}t change tip\+Offset, size is increased. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a13e1490f02183b51e741bb33614d750b}\label{class_r_v_1_1_cyclic_array_a13e1490f02183b51e741bb33614d750b}} 
+const char $\ast$ {\bfseries get\+Debug\+Str} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename T\+Component$>$\newline
+class R\+V\+::\+Cyclic\+Array$<$ T\+Component $>$}
+
+
+
+Definition at line 10 of file Cyclic\+Array.\+hpp.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_r_v_1_1_cyclic_array_a1e63821419c2148525d485c3ea6d3778}\label{class_r_v_1_1_cyclic_array_a1e63821419c2148525d485c3ea6d3778}} 
+\index{RV::CyclicArray$<$ TComponent $>$@{RV::CyclicArray$<$ TComponent $>$}!shiftClockwise@{shiftClockwise}}
+\index{shiftClockwise@{shiftClockwise}!RV::CyclicArray$<$ TComponent $>$@{RV::CyclicArray$<$ TComponent $>$}}
+\doxysubsubsection{\texorpdfstring{shiftClockwise()}{shiftClockwise()}}
+{\footnotesize\ttfamily template$<$typename T\+Component $>$ \\
+constexpr int32\+\_\+t \mbox{\hyperlink{class_r_v_1_1_cyclic_array}{R\+V\+::\+Cyclic\+Array}}$<$ T\+Component $>$\+::shift\+Clockwise (\begin{DoxyParamCaption}\item[{int32\+\_\+t}]{count }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [constexpr]}}
+
+
+
+Shifts the components in a clockwise manner. Doesn\textquotesingle{}t move base ptr, doesn\textquotesingle{}t change tip\+Offset, size is increased. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em count} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+constexpr int32\+\_\+t 
+\end{DoxyReturn}
+
+
+Definition at line 88 of file Cyclic\+Array.\+hpp.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Cyclic\+Array.\+hpp\end{DoxyCompactItemize}

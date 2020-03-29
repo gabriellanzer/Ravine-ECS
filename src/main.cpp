@@ -5,7 +5,8 @@
 #include <chrono>
 #include <iostream>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     ISystem *gravitySystem = new GravitySystem();
     ISystem *movementSystem = new MovementSystem();
     ISystem *boundingSystem = new BoundingSystem();
@@ -21,7 +22,8 @@ int main(int argc, char **argv) {
     ComponentsManager::createComponents<VelocityComponent>({});
     ComponentsManager::createComponents<PositionComponent>({});
 
-    while (true) {
+    while (true)
+    {
         // system("cls");
 
         // Start Delta-time

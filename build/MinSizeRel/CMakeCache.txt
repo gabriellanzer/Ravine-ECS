@@ -131,7 +131,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=testProject
+CMAKE_PROJECT_NAME:STATIC=Ravine-ECS
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=0.1.0
@@ -218,6 +218,12 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 // during the make.  This is useful for debugging only. With Visual
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
+
+//Value Computed by CMake
+Ravine-ECS_BINARY_DIR:STATIC=D:/Projects/Personal/Ravine-ECS/build/MinSizeRel
+
+//Value Computed by CMake
+Ravine-ECS_SOURCE_DIR:STATIC=D:/Projects/Personal/Ravine-ECS
 
 //Value Computed by CMake
 testProject_BINARY_DIR:STATIC=D:/Projects/Personal/Ravine-ECS/build/MinSizeRel

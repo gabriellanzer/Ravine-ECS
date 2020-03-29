@@ -6,7 +6,7 @@
 # It is included in the main 'build.ninja'.
 
 # =============================================================================
-# Project: testProject
+# Project: Ravine-ECS
 # Configurations: MinSizeRel
 # =============================================================================
 # =============================================================================
@@ -28,7 +28,7 @@ rule CUSTOM_COMMAND
 #############################################
 # Rule for compiling CXX files.
 
-rule CXX_COMPILER__main_MinSizeRel
+rule CXX_COMPILER__ravine-ecs_MinSizeRel
   deps = msvc
   command = C:\PROGRA~1\LLVM\bin\clang-cl.exe  /nologo -TP $DEFINES $INCLUDES $FLAGS /showIncludes /Fo$out /Fd$TARGET_COMPILE_PDB -c $in
   description = Building CXX object $out
@@ -37,7 +37,7 @@ rule CXX_COMPILER__main_MinSizeRel
 #############################################
 # Rule for linking CXX executable.
 
-rule CXX_EXECUTABLE_LINKER__main_MinSizeRel
+rule CXX_EXECUTABLE_LINKER__ravine-ecs_MinSizeRel
   command = cmd.exe /C "$PRE_LINK && "C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=$OBJECT_DIR --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x64\mt.exe --manifests $MANIFESTS -- C:\PROGRA~1\LLVM\bin\lld-link.exe /nologo $in  /out:$TARGET_FILE /implib:$TARGET_IMPLIB /pdb:$TARGET_PDB /version:0.0  $LINK_FLAGS $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking CXX executable $TARGET_FILE
   restat = $RESTAT
