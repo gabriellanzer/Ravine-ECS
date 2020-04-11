@@ -5,6 +5,8 @@
 #include "PositionComponent.hpp"
 #include "VelocityComponent.hpp"
 
+using namespace rv;
+
 class BoundingSystem : public BaseSystem<PositionComponent, VelocityComponent>
 {
     virtual void update(double deltaTime, size_t size, PositionComponent *pos, VelocityComponent *vel)

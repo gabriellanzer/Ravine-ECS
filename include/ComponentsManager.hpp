@@ -13,7 +13,8 @@ using std::tuple;
 using std::unordered_set;
 using std::vector;
 
-namespace RV {
+namespace rv
+{
 
 class ComponentsManager
 {
@@ -55,7 +56,8 @@ class ComponentsManager
     }
 
     // Sets offset for the relative ComponentTypes
-    template <class TComponent, class... TComponents> static array<size_t *, sizeof...(TComponents)> createComponentRelation()
+    template <class TComponent, class... TComponents>
+    static array<size_t *, sizeof...(TComponents)> createComponentRelation()
     {
         return {createRelation<TComponent, TComponents>()...};
     }
@@ -98,7 +100,8 @@ class ComponentsManager
 
     template <class TComponent> static void increaseOffsets(const size_t startPos, const size_t count = 1) {}
 
-    template <class TComponent, class TOtherComponent, class... TComponents> static void increaseOffsets(const size_t startPos, const size_t count = 1)
+    template <class TComponent, class TOtherComponent, class... TComponents>
+    static void increaseOffsets(const size_t startPos, const size_t count = 1)
     {
         if (!static_cast<bool>(std::is_same<TComponent, TOtherComponent>::value))
         {
@@ -153,7 +156,8 @@ class ComponentsManager
 
     template <class TComponent> static void increaseSizes(const size_t startPos = 0, const size_t count = 1) {}
 
-    template <class TComponent, class TOtherComponent, class... TComponents> static void increaseSizes(const size_t startPos = 0, const size_t count = 1)
+    template <class TComponent, class TOtherComponent, class... TComponents>
+    static void increaseSizes(const size_t startPos = 0, const size_t count = 1)
     {
         ComponentsList *list = getRelativityList<TComponent>();
         ComponentsList *otherList = getRelativityList<TOtherComponent>();
@@ -192,9 +196,12 @@ class ComponentsManager
         return {*getComponentOffset<TComponents, TComponents...>()...};
     }
 
-    template <class... TComponents> static array<size_t, sizeof...(TComponents)> getSizes() { return {*getComponentSize<TComponents, TComponents...>()...}; }
+    template <class... TComponents> static array<size_t, sizeof...(TComponents)> getSizes()
+    {
+        return {*getComponentSize<TComponents, TComponents...>()...};
+    }
 };
 
-}
+} // namespace rv
 
 #endif

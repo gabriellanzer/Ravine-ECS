@@ -1,5 +1,0 @@
-# ninja log v5
-1	2081	607141800	CMakeFiles/main.dir/src/GravitySystem.cpp.obj	9d6333a578601036
-419	2124	607141800	CMakeFiles/main.dir/src/MovementSystem.cpp.obj	923ce208b8a5e592
-937	3191	607141801	CMakeFiles/main.dir/src/main.cpp.obj	a145c8b0696079b3
-3191	4090	607141802	../../bin/RelWithDebInfo/main.exe	a641a47f7788dab8

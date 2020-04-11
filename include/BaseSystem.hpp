@@ -9,7 +9,7 @@
 using std::get;
 using std::tuple;
 
-namespace RV
+namespace rv
 {
 
 template <class... TComponents> class BaseSystem : public ISystem
@@ -88,6 +88,6 @@ template <class... TComponents> class BaseSystem : public ISystem
     virtual void update(double deltaTime, size_t size, TComponents *... components) = 0;
 };
 
-} // namespace RV
+} // namespace rv
 
 #endif

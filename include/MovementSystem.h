@@ -6,6 +6,7 @@
 #include "VelocityComponent.hpp"
 #include <iostream>
 
+using namespace rv;
 using std::cout;
 using std::endl;
 

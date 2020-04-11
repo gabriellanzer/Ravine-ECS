@@ -4,6 +4,9 @@
 #include <unordered_map>
 using std::unordered_map;
 
+namespace rv
+{
+
 class ComponentsList
 {
     unordered_map<ComponentsList *, size_t *> relativeOffsets;
@@ -119,5 +122,7 @@ class ComponentsList
         }
     }
 };
+
+} // namespace rv
 
 #endif

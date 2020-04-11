@@ -5,7 +5,7 @@
       "name": "(Windows) Launch",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/Debug/ravine-ecs.exe",  
+      "program": "${workspaceFolder}/bin/Debug/ravine-ecs.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

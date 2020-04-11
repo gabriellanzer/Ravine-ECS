@@ -4,6 +4,8 @@
 #include "BaseSystem.hpp"
 #include "VelocityComponent.hpp"
 
+using namespace rv;
+
 class GravitySystem : public BaseSystem<VelocityComponent>
 {
     // Inherited via BaseSystem

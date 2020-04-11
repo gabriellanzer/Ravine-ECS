@@ -2,7 +2,7 @@
 #define FASTMATH_H
 #include <stdint.h>
 
-namespace RV
+namespace rv
 {
 
 /**

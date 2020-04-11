@@ -1,6 +1,9 @@
 {
   "files.associations": {
-    "*.tpp": "cpp"
+    "*.tpp": "cpp",
+    "unordered_map": "cpp",
+    "xiosbase": "cpp"
   },
-  "terminal.integrated.shell.windows": "cmd.exe"
+  "cmake.configureOnOpen": true,
+  "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/"
 }

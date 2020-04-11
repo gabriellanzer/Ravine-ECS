@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iostream>
 
+using namespace rv;
+
 int main(int argc, char **argv)
 {
     ISystem *gravitySystem = new GravitySystem();

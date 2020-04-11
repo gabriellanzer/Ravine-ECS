@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <string>
 
-namespace RV
+namespace rv
 {
 
 template <typename TComponent> class CyclicArray
@@ -27,7 +27,7 @@ template <typename TComponent> class CyclicArray
     {
     }
 
-    constexpr void reallocate(int32_t newCapacity = 0)
+    void reallocate(int32_t newCapacity = 0)
     {
         const int32_t grow = max(capacity, newCapacity) * 1.5f;
         TComponent *oldData = data;
