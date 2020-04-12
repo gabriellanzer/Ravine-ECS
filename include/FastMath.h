@@ -39,6 +39,6 @@ constexpr int32_t max(const int32_t a, const int32_t b)
     return a * (1 - mask) + b * mask;
 }
 
-} // namespace RV
+} // namespace rv
 
 #endif

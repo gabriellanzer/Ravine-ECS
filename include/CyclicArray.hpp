@@ -15,41 +15,41 @@ template <typename TComponent> class CyclicArray
     TComponent *data = nullptr;
 
   public:
-    CyclicArray()
-        : capacity(10),
-          data(_ASSERT((this->data = static_cast<TComponent *>(calloc(10, sizeof(TComponent)))) != nullptr))
-    {
-    }
+    CyclicArray() : capacity(10), data(static_cast<TComponent *>(malloc(10 * sizeof(TComponent)))) {}
 
     explicit CyclicArray(const int32_t capacity)
-        : capacity(capacity),
-          data(_ASSERT((this->data = static_cast<TComponent *>(calloc(capacity, sizeof(TComponent)))) != nullptr))
+        : capacity(capacity), data(static_cast<TComponent *>(malloc(capacity * sizeof(TComponent))))
     {
     }
 
     void reallocate(int32_t newCapacity = 0)
     {
         const int32_t grow = max(capacity, newCapacity) * 1.5f;
-        TComponent *oldData = data;
-        _ASSERT((data = static_cast<TComponent *>(calloc(grow, sizeof(TComponent)))) != nullptr);
-        _ASSERT(memcpy(data, oldData, sizeof(TComponent) * capacity) != nullptr);
+        TComponent *newData = static_cast<TComponent *>(malloc(grow * sizeof(TComponent)));
+        memcpy((void *)newData, (void *)data, capacity * sizeof(TComponent));
+        free((void *)data);
+        data = newData;
         capacity = grow;
-        free(oldData);
     }
 
-    int32_t addComponent(const TComponent *comps, const uint32_t count)
+    void addComponent(const TComponent *comps, const uint32_t count)
     {
+        const int32_t missLeft = tipOffset - count;
+        const int32_t rightMask = signMask(missLeft);
+        const int32_t rightCount = rightMask * -missLeft;
+        const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
+
         if (size + count > capacity)
             reallocate();
+        // Copy to the end of the list
+        memcpy(data + size, comps + leftCount, sizeof(TComponent) * rightCount);
+        // Copy components to the left of the tip
+        memcpy(data + tipOffset - leftCount, comps + 0, sizeof(TComponent) * leftCount);
 
-        const int32_t addPosition = size;
-        _ASSERT(memcpy(data + addPosition, comps, sizeof(TComponent) * count) != nullptr);
-        size += count;
-
-        return addPosition;
+        size += rightCount;
     }
 
-    int32_t addComponent(const TComponent &comp) { return addComponent(&comp, 1); }
+    void addComponent(const TComponent &comp) { addComponent(&comp, 1); }
 
     constexpr const TComponent *getData() const { return this->data; }
 
@@ -75,7 +75,7 @@ template <typename TComponent> class CyclicArray
         tipOffset += signMask(tipOffset) * size; // Wrap around
 
         // Should Increase base ptr
-        // data += toCpy;
+        data += toCpy;
     }
 
     /**
@@ -101,18 +101,27 @@ template <typename TComponent> class CyclicArray
         return count;                               // Returns how many slots left before tip
     }
 
+    /**
+     * @brief Gets the debug string.
+     *
+     * @return const char*
+     */
     const char *getDebugStr() const
     {
-        const debugSize = size * 2;
-        const char *debugStr = new char[debugSize + 1];
-        debugStr[debugSize] = '\0';
-        for (size_t it = 0; it < debugSize; it++)
+        const int32_t debugSize = size * 2;
+        char *debugStr = new char[debugSize + 2];
+        for (size_t it = 0; it < size; it++)
         {
+            debugStr[it] = data[it];
+            debugStr[size + 1 + it] = '~';
         }
+        debugStr[size] = '\n';
+        debugStr[debugSize + 1] = '\0';
+        debugStr[size + 1 + tipOffset] = '^';
         return debugStr;
     }
 };
 
-} // namespace RV
+} // namespace rv
 
 #endif
