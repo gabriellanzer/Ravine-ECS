@@ -1,0 +1,12 @@
+{
+  "files.associations": {
+    "*.tpp": "cpp",
+    "unordered_map": "cpp",
+    "xiosbase": "cpp",
+    "ostream": "cpp",
+    "iostream": "cpp",
+    "cstdlib": "cpp"
+  },
+  "cmake.configureOnOpen": true,
+  "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/"
+}

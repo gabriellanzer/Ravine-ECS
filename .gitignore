@@ -326,5 +326,8 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
-# .exe files
-*.exe
+# CMake Build directory
+build/
+
+# ClangD directory
+.clangd/

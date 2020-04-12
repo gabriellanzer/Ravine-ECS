@@ -1,0 +1,85 @@
+\hypertarget{class_r_v_1_1_base_system}{}\doxysection{RV\+::Base\+System$<$ T\+Components $>$ Class Template Reference}
+\label{class_r_v_1_1_base_system}\index{RV::BaseSystem$<$ TComponents $>$@{RV::BaseSystem$<$ TComponents $>$}}
+Inheritance diagram for RV\+::Base\+System$<$ T\+Components $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_r_v_1_1_base_system}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_r_v_1_1_base_system_aa48aa30f55ea857a079ab34a49aacc30}{update}} (double delta\+Time) override final
+\begin{DoxyCompactList}\small\item\em Update base function, called by the E\+CS framework. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_r_v_1_1_base_system_ab6093dda305d34d34cb6c23794b6c36d}{update}} (double delta\+Time, size\+\_\+t size, T\+Components $\ast$... components)=0
+\begin{DoxyCompactList}\small\item\em Update virtual function to be overriten by a System implementation. Called by the. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$class... T\+Components$>$\newline
+class R\+V\+::\+Base\+System$<$ T\+Components $>$}
+
+
+
+Definition at line 15 of file Base\+System.\+hpp.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_r_v_1_1_base_system_aa48aa30f55ea857a079ab34a49aacc30}\label{class_r_v_1_1_base_system_aa48aa30f55ea857a079ab34a49aacc30}} 
+\index{RV::BaseSystem$<$ TComponents $>$@{RV::BaseSystem$<$ TComponents $>$}!update@{update}}
+\index{update@{update}!RV::BaseSystem$<$ TComponents $>$@{RV::BaseSystem$<$ TComponents $>$}}
+\doxysubsubsection{\texorpdfstring{update()}{update()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$class... T\+Components$>$ \\
+void \mbox{\hyperlink{class_r_v_1_1_base_system}{R\+V\+::\+Base\+System}}$<$ T\+Components $>$\+::update (\begin{DoxyParamCaption}\item[{double}]{delta\+Time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [final]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Update base function, called by the E\+CS framework. 
+
+\begin{DoxySeeAlso}{See also}
+\{System\+Manager\}.
+\end{DoxySeeAlso}
+
+\begin{DoxyParams}{Parameters}
+{\em delta\+Time} & Timespan between last and current frame (in seconds). \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_i_system}{I\+System}}.
+
+
+
+Definition at line 64 of file Base\+System.\+hpp.
+
+\mbox{\Hypertarget{class_r_v_1_1_base_system_ab6093dda305d34d34cb6c23794b6c36d}\label{class_r_v_1_1_base_system_ab6093dda305d34d34cb6c23794b6c36d}} 
+\index{RV::BaseSystem$<$ TComponents $>$@{RV::BaseSystem$<$ TComponents $>$}!update@{update}}
+\index{update@{update}!RV::BaseSystem$<$ TComponents $>$@{RV::BaseSystem$<$ TComponents $>$}}
+\doxysubsubsection{\texorpdfstring{update()}{update()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$class... T\+Components$>$ \\
+virtual void \mbox{\hyperlink{class_r_v_1_1_base_system}{R\+V\+::\+Base\+System}}$<$ T\+Components $>$\+::update (\begin{DoxyParamCaption}\item[{double}]{delta\+Time,  }\item[{size\+\_\+t}]{size,  }\item[{T\+Components $\ast$...}]{components }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Update virtual function to be overriten by a System implementation. Called by the. 
+
+\begin{DoxySeeAlso}{See also}
+\{\mbox{\hyperlink{class_r_v_1_1_base_system}{Base\+System}}\} class through 
+
+\{System\+Manager\} command.
+\end{DoxySeeAlso}
+
+\begin{DoxyParams}{Parameters}
+{\em delta\+Time} & Timespan between last and current frame (in seconds). \\
+\hline
+{\em size} & Amount of entities the components represent. \\
+\hline
+{\em components} & List expansion for each component type this system runs through. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Base\+System.\+hpp\end{DoxyCompactItemize}
