@@ -9,8 +9,8 @@ namespace rv
 
 class ComponentsList
 {
-    unordered_map<ComponentsList *, size_t *> relativeOffsets;
-    unordered_map<ComponentsList *, size_t *> relativeSizes;
+    unordered_map<ComponentsList*, size_t*> relativeOffsets;
+    unordered_map<ComponentsList*, size_t*> relativeSizes;
     const uint32_t dataTypeSize;
 
   public:
@@ -19,19 +19,19 @@ class ComponentsList
 
     explicit ComponentsList(const uint32_t dataTypeSize) : dataTypeSize(dataTypeSize) {}
 
-    size_t *linkRelativeOffset(ComponentsList *relativeList)
+    size_t* linkRelativeOffset(ComponentsList* relativeList)
     {
         const auto res = relativeOffsets.emplace(relativeList, new size_t(0));
         return res.first->second;
     }
 
-    size_t *linkRelativeSize(ComponentsList *relativeList)
+    size_t* linkRelativeSize(ComponentsList* relativeList)
     {
         const auto res = relativeSizes.emplace(relativeList, new size_t(0));
         return res.first->second;
     }
 
-    size_t *getRelativeOffset(ComponentsList *relativeList)
+    size_t* getRelativeOffset(ComponentsList* relativeList)
     {
         const auto it = relativeOffsets.find(relativeList);
         if (it != relativeOffsets.end())
@@ -41,7 +41,7 @@ class ComponentsList
         return nullptr;
     }
 
-    size_t *getRelativeSize(ComponentsList *relativeList)
+    size_t* getRelativeSize(ComponentsList* relativeList)
     {
         const auto it = relativeSizes.find(relativeList);
         if (it != relativeSizes.end())
@@ -51,7 +51,7 @@ class ComponentsList
         return nullptr;
     }
 
-    void incrementRelativeOffset(ComponentsList *relativeList, const size_t startPos, const size_t count = 1)
+    void incrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
     {
         const auto it = relativeOffsets.find(relativeList);
         if (it != relativeOffsets.end())
@@ -74,7 +74,7 @@ class ComponentsList
         }
     }
 
-    void incrementRelativeSize(ComponentsList *relativeList, const size_t startPos, const size_t count = 1)
+    void incrementRelativeSize(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
     {
         const auto itOffset = relativeOffsets.find(relativeList);
         const auto itSize = relativeSizes.find(relativeList);
@@ -87,7 +87,7 @@ class ComponentsList
         }
     }
 
-    void decrementRelativeOffset(ComponentsList *relativeList, const size_t startPos, const size_t count = 1)
+    void decrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
     {
         const auto it = relativeOffsets.find(relativeList);
         if (it != relativeOffsets.end())
@@ -110,7 +110,7 @@ class ComponentsList
         }
     }
 
-    void decrementRelativeSizes(ComponentsList *relativeList, const size_t startPos, const size_t count = 1)
+    void decrementRelativeSizes(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
     {
         const auto it = relativeSizes.find(relativeList);
         if (it != relativeSizes.end())

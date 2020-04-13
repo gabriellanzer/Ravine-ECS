@@ -12,7 +12,7 @@ struct VelocityComponent
 
     VelocityComponent(float Vx, float Vy, float Vz) : Vx(Vx), Vy(Vy), Vz(Vz) {}
 
-    VelocityComponent &operator*=(const double &rhs)
+    VelocityComponent& operator*=(const double& rhs)
     {
 
         Vx *= rhs;
@@ -21,7 +21,7 @@ struct VelocityComponent
         return *this;
     }
 
-    VelocityComponent operator*(const double &rhs)
+    VelocityComponent operator*(const double& rhs)
     {
         VelocityComponent comp;
         comp.Vx = Vx * rhs;
@@ -30,7 +30,7 @@ struct VelocityComponent
         return comp;
     }
 
-    VelocityComponent &operator+=(const VelocityComponent &rhs)
+    VelocityComponent& operator+=(const VelocityComponent& rhs)
     {
 
         Vx += rhs.Vx;
@@ -39,7 +39,7 @@ struct VelocityComponent
         return *this;
     }
 
-    friend ostream &operator<<(ostream &os, const VelocityComponent &vel)
+    friend ostream& operator<<(ostream& os, const VelocityComponent& vel)
     {
         os << "{ " << vel.Vx << "; " << vel.Vy << "; " << vel.Vz << "}";
         return os;

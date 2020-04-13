@@ -13,27 +13,27 @@ template <typename TComponent> class ComponentGroup
     int32_t size = 0;
     int32_t capacity = 0;
     int32_t tipOffset = 0;
-    TComponent *data = nullptr;
+    TComponent* data = nullptr;
 
   public:
-    ComponentGroup() : capacity(10), data(static_cast<TComponent *>(malloc(10 * sizeof(TComponent)))) {}
+    ComponentGroup() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
 
     explicit ComponentGroup(const int32_t capacity)
-        : capacity(capacity), data(static_cast<TComponent *>(malloc(capacity * sizeof(TComponent))))
+        : capacity(capacity), data(static_cast<TComponent*>(malloc(capacity * sizeof(TComponent))))
     {
     }
 
     void grow(int32_t newCapacity = 0)
     {
         const int32_t grow = max(capacity, newCapacity) * 1.5f;
-        TComponent *newData = static_cast<TComponent *>(malloc(grow * sizeof(TComponent)));
+        TComponent* newData = static_cast<TComponent*>(malloc(grow * sizeof(TComponent)));
         memcpy(newData, data, capacity * sizeof(TComponent));
         free(data);
         data = newData;
         capacity = grow;
     }
 
-    void addComponent(const TComponent *comps, const uint32_t count)
+    void addComponent(const TComponent* comps, const uint32_t count)
     {
         const int32_t missLeft = tipOffset - count;
         const int32_t rightMask = signMask(missLeft);
@@ -50,11 +50,11 @@ template <typename TComponent> class ComponentGroup
         size += rightCount;
     }
 
-    void addComponent(const TComponent &comp) { addComponent(&comp, 1); }
+    void addComponent(const TComponent& comp) { addComponent(&comp, 1); }
 
-    constexpr const TComponent *getDataIt() const { return data + baseOffset; }
+    constexpr const TComponent* getDataIt() const { return data + baseOffset; }
 
-    constexpr const TComponent *getDataIt(int32_t &size) const
+    constexpr const TComponent* getDataIt(int32_t& size) const
     {
         size = this->size;
         return data + baseOffset;
@@ -107,10 +107,10 @@ template <typename TComponent> class ComponentGroup
      *
      * @return const char*
      */
-    const char *getDebugStr() const
+    const char* getDebugStr() const
     {
         const int32_t debugSize = capacity * 2;
-        char *debugStr = new char[debugSize + 2];
+        char* debugStr = new char[debugSize + 2];
         for (size_t debugIt = 0; debugIt < capacity; debugIt++)
         {
             debugStr[debugIt] = data[debugIt];

@@ -13,7 +13,7 @@ struct PositionComponent
 
     PositionComponent(float x, float y, float z) : x(x), y(y), z(z) {}
 
-    PositionComponent &operator*=(const double &rhs)
+    PositionComponent& operator*=(const double& rhs)
     {
 
         x *= rhs;
@@ -22,7 +22,7 @@ struct PositionComponent
         return *this;
     }
 
-    PositionComponent operator*(const double &rhs)
+    PositionComponent operator*(const double& rhs)
     {
         PositionComponent comp;
         comp.x = x * rhs;
@@ -31,7 +31,7 @@ struct PositionComponent
         return comp;
     }
 
-    PositionComponent &operator+=(const PositionComponent &rhs)
+    PositionComponent& operator+=(const PositionComponent& rhs)
     {
 
         x += rhs.x;
@@ -40,7 +40,7 @@ struct PositionComponent
         return *this;
     }
 
-    PositionComponent &operator+=(const VelocityComponent &rhs)
+    PositionComponent& operator+=(const VelocityComponent& rhs)
     {
 
         x += rhs.Vx;
@@ -49,7 +49,7 @@ struct PositionComponent
         return *this;
     }
 
-    friend ostream &operator<<(ostream &os, const PositionComponent &pos)
+    friend ostream& operator<<(ostream& os, const PositionComponent& pos)
     {
         os << "{ " << pos.x << "; " << pos.y << "; " << pos.z << "}";
         return os;

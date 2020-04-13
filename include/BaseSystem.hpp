@@ -15,18 +15,18 @@ namespace rv
 template <class... TComponents> class BaseSystem : public ISystem
 {
   private:
-    tuple<TComponents *...> componentLists;
+    tuple<TComponents*...> componentLists;
 
     template <int It>
-    constexpr void getComponent(tuple<TComponents *...> &componentLists, array<size_t, sizeof...(TComponents)> offsets)
+    constexpr void getComponent(tuple<TComponents*...>& componentLists, array<size_t, sizeof...(TComponents)> offsets)
     {
     }
 
     template <int It, class TComponent, class... TArgs>
-    constexpr void getComponent(tuple<TComponents *...> &componentLists, array<size_t, sizeof...(TComponents)> offsets)
+    constexpr void getComponent(tuple<TComponents*...>& componentLists, array<size_t, sizeof...(TComponents)> offsets)
     {
         // Get Component List from manager for TComponent type
-        vector<TComponent> &componentList = ComponentsManager::getArray<TComponent>();
+        vector<TComponent>& componentList = ComponentsManager::getArray<TComponent>();
         get<It>(componentLists) = componentList.data() + get<It>(offsets);
 
         getComponent<It + 1, TArgs...>(componentLists, offsets);
@@ -41,7 +41,7 @@ template <class... TComponents> class BaseSystem : public ISystem
      * @param componentLists Lists for each component type this system runs through
      */
     template <int... S>
-    constexpr void updateUnfold(double deltaTime, size_t size, tuple<TComponents *...> &componentLists, seq<S...>)
+    constexpr void updateUnfold(double deltaTime, size_t size, tuple<TComponents*...>& componentLists, seq<S...>)
     {
         update(deltaTime, size, get<S>(componentLists)...);
     }
@@ -85,7 +85,7 @@ template <class... TComponents> class BaseSystem : public ISystem
      * @param size Amount of entities the components represent.
      * @param components List expansion for each component type this system runs through.
      */
-    virtual void update(double deltaTime, size_t size, TComponents *... components) = 0;
+    virtual void update(double deltaTime, size_t size, TComponents*... components) = 0;
 };
 
 } // namespace rv

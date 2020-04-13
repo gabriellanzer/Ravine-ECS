@@ -9,7 +9,7 @@ using namespace rv;
 
 class BoundingSystem : public BaseSystem<PositionComponent, VelocityComponent>
 {
-    virtual void update(double deltaTime, size_t size, PositionComponent *pos, VelocityComponent *vel)
+    virtual void update(double deltaTime, size_t size, PositionComponent* pos, VelocityComponent* vel)
     {
         for (size_t i = 0; i < size; i++)
         {

@@ -11,7 +11,7 @@
 
 using namespace rv;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     // ISystem *gravitySystem = new GravitySystem();
     // ISystem *movementSystem = new MovementSystem();

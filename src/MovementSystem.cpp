@@ -1,7 +1,7 @@
 #include "MovementSystem.h"
 #include <iostream>
 
-void MovementSystem::update(const double deltaTime, const size_t size, VelocityComponent *vel, PositionComponent *pos)
+void MovementSystem::update(const double deltaTime, const size_t size, VelocityComponent* vel, PositionComponent* pos)
 {
     for (size_t i = 0; i < size; i++)
     {
