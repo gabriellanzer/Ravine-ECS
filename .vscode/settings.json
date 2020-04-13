@@ -5,7 +5,21 @@
     "xiosbase": "cpp",
     "ostream": "cpp",
     "iostream": "cpp",
-    "cstdlib": "cpp"
+    "cstdlib": "cpp",
+    "vector": "cpp",
+    "xstring": "cpp",
+    "algorithm": "cpp",
+    "cmath": "cpp",
+    "istream": "cpp",
+    "list": "cpp",
+    "streambuf": "cpp",
+    "string": "cpp",
+    "type_traits": "cpp",
+    "xhash": "cpp",
+    "xlocale": "cpp",
+    "xlocnum": "cpp",
+    "xmemory": "cpp",
+    "xutility": "cpp"
   },
   "cmake.configureOnOpen": true,
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/"

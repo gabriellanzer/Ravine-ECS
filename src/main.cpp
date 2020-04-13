@@ -7,7 +7,7 @@
 #include "GravitySystem.h"
 #include "MovementSystem.h"
 
-#include "CyclicArray.hpp"
+#include "ComponentGroup.hpp"
 
 using namespace rv;
 
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     // ComponentsManager::createComponents<VelocityComponent>({});
     // ComponentsManager::createComponents<PositionComponent>({});
 
-    CyclicArray<char> testCyclic;
+    ComponentGroup<char> testCyclic;
     const char* str = "testBemGrande";
     testCyclic.addComponent(str, 13);
     cout << testCyclic.getDebugStr() << endl;
@@ -39,25 +39,25 @@ int main(int argc, char **argv)
     testCyclic.addComponent("XZ", 2);
     cout << testCyclic.getDebugStr() << endl;
 
+    // while (true)
+    // {
+    //     // system("cls");
 
-    while (true)
-    {
-        // // system("cls");
+    //     // Start Delta-time
+    //     static double dt = 0.03;
+    //     static auto mStartTime = std::chrono::system_clock::now();
 
-        // // Start Delta-time
-        // static double dt = 0.03;
-        // static auto mStartTime = std::chrono::system_clock::now();
+    //     // Update Systems
+    //     movementSystem->update(dt);
+    //     gravitySystem->update(dt);
+    //     boundingSystem->update(dt);
 
-        // // Update Systems
-        // movementSystem->update(dt);
-        // gravitySystem->update(dt);
-        // boundingSystem->update(dt);
+    //     // Update Delta-time
+    //     static auto mEndTime = std::chrono::system_clock::now();
+    //     dt = std::chrono::duration_cast<std::chrono::nanoseconds>(mEndTime - mStartTime).count() * 1e-9;
+    //     cout << "Delta-time:" << dt << endl;
+    // }
 
-        // // Update Delta-time
-        // static auto mEndTime = std::chrono::system_clock::now();
-        // dt = std::chrono::duration_cast<std::chrono::nanoseconds>(mEndTime - mStartTime).count() * 1e-9;
-        // cout << "Delta-time:" << dt << endl;
-    }
     system("pause");
     return 0;
 }

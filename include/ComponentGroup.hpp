@@ -7,27 +7,28 @@
 namespace rv
 {
 
-template <typename TComponent> class CyclicArray
+template <typename TComponent> class ComponentGroup
 {
+    int32_t baseOffset = 0;
     int32_t size = 0;
     int32_t capacity = 0;
     int32_t tipOffset = 0;
     TComponent *data = nullptr;
 
   public:
-    CyclicArray() : capacity(10), data(static_cast<TComponent *>(malloc(10 * sizeof(TComponent)))) {}
+    ComponentGroup() : capacity(10), data(static_cast<TComponent *>(malloc(10 * sizeof(TComponent)))) {}
 
-    explicit CyclicArray(const int32_t capacity)
+    explicit ComponentGroup(const int32_t capacity)
         : capacity(capacity), data(static_cast<TComponent *>(malloc(capacity * sizeof(TComponent))))
     {
     }
 
-    void reallocate(int32_t newCapacity = 0)
+    void grow(int32_t newCapacity = 0)
     {
         const int32_t grow = max(capacity, newCapacity) * 1.5f;
         TComponent *newData = static_cast<TComponent *>(malloc(grow * sizeof(TComponent)));
-        memcpy((void *)newData, (void *)data, capacity * sizeof(TComponent));
-        free((void *)data);
+        memcpy(newData, data, capacity * sizeof(TComponent));
+        free(data);
         data = newData;
         capacity = grow;
     }
@@ -40,42 +41,42 @@ template <typename TComponent> class CyclicArray
         const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
 
         if (size + count > capacity)
-            reallocate();
+            grow();
         // Copy to the end of the list
-        memcpy(data + size, comps + leftCount, sizeof(TComponent) * rightCount);
+        memcpy(data + baseOffset + size, comps + leftCount, sizeof(TComponent) * rightCount);
         // Copy components to the left of the tip
-        memcpy(data + tipOffset - leftCount, comps + 0, sizeof(TComponent) * leftCount);
+        memcpy(data + baseOffset + tipOffset - leftCount, comps + 0, sizeof(TComponent) * leftCount);
 
         size += rightCount;
     }
 
     void addComponent(const TComponent &comp) { addComponent(&comp, 1); }
 
-    constexpr const TComponent *getData() const { return this->data; }
+    constexpr const TComponent *getDataIt() const { return data + baseOffset; }
 
-    constexpr const TComponent *getData(int32_t &size) const
+    constexpr const TComponent *getDataIt(int32_t &size) const
     {
         size = this->size;
-        return this->data;
+        return data + baseOffset;
     }
 
-    constexpr int32_t getSize() const { return this->size; }
+    constexpr int32_t getSize() const { return size; }
 
     // Should move base ptr, changes tipOffset, size is maintained
     constexpr void rollClockwise(const int32_t count)
     {
         const int32_t toCpy = min(size, count);
         const int32_t stride = max(size, count);
-        if (stride + toCpy > capacity) // If there isn't enough space
+        if (baseOffset + stride + toCpy > capacity) // If there isn't enough space
         {
-            reallocate(stride + toCpy);
+            grow(stride + toCpy);
         }
-        memcpy(data + stride, data, toCpy);      // Roll data
-        tipOffset -= toCpy;                      // Decrease tipOffset
-        tipOffset += signMask(tipOffset) * size; // Wrap around
+        memcpy(data + baseOffset + stride, data + baseOffset, toCpy); // Roll data
+        tipOffset -= toCpy;                                           // Decrease tipOffset
+        tipOffset += signMask(tipOffset) * size;                      // Wrap around
 
         // Should Increase base ptr
-        data += toCpy;
+        baseOffset += toCpy;
     }
 
     /**
@@ -91,14 +92,14 @@ template <typename TComponent> class CyclicArray
         const int32_t mask = signMask(count - tipOffset);
         const int32_t shiftCount = (tipOffset - count) * mask;
         const int32_t rollCount = count * mask;
-        if (size + rollCount > capacity) // If there isn't enough space
+        if (baseOffset + size + rollCount > capacity) // If there isn't enough space
         {
-            reallocate(size + rollCount);
+            grow(baseOffset + size + rollCount);
         }
-        memcpy(data + size, data, rollCount);       // Roll data
-        memcpy(data, data + rollCount, shiftCount); // Shift data
-        size += count;                              // Increases size to update end of array
-        return count;                               // Returns how many slots left before tip
+        memcpy(data + baseOffset + size, data + baseOffset, rollCount);       // Roll data
+        memcpy(data + baseOffset, data + baseOffset + rollCount, shiftCount); // Shift data
+        size += count;                                                        // Increases size to update end of array
+        return count;                                                         // Returns how many slots left before tip
     }
 
     /**
@@ -108,16 +109,23 @@ template <typename TComponent> class CyclicArray
      */
     const char *getDebugStr() const
     {
-        const int32_t debugSize = size * 2;
+        const int32_t debugSize = capacity * 2;
         char *debugStr = new char[debugSize + 2];
-        for (size_t it = 0; it < size; it++)
+        for (size_t debugIt = 0; debugIt < capacity; debugIt++)
         {
-            debugStr[it] = data[it];
-            debugStr[size + 1 + it] = '~';
+            debugStr[debugIt] = data[debugIt];
+            if (debugIt < baseOffset || debugIt >= baseOffset + size)
+            {
+                debugStr[capacity + 1 + debugIt] = 'x';
+            }
+            else
+            {
+                debugStr[capacity + 1 + debugIt] = '~';
+            }
         }
-        debugStr[size] = '\n';
+        debugStr[capacity] = '\n';
         debugStr[debugSize + 1] = '\0';
-        debugStr[size + 1 + tipOffset] = '^';
+        debugStr[capacity + 1 + tipOffset] = '^';
         return debugStr;
     }
 };
