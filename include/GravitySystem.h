@@ -1,5 +1,5 @@
-#ifndef GRAVITYSYSTEM_H
-#define GRAVITYSYSTEM_H
+#ifndef _GRAVITYSYSTEM_H
+#define _GRAVITYSYSTEM_H
 
 #include "BaseSystem.hpp"
 #include "VelocityComponent.hpp"

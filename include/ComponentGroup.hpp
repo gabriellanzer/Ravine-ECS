@@ -1,19 +1,27 @@
 #ifndef CYCLIC_ARRAY_HPP
 #define CYCLIC_ARRAY_HPP
-#include "FastMath.h"
+
 #include <cstdlib>
 #include <string>
+
+#include "FastMath.h"
 
 namespace rv
 {
 
 template <typename TComponent> class ComponentGroup
 {
+  private:
     int32_t baseOffset = 0;
     int32_t size = 0;
     int32_t capacity = 0;
     int32_t tipOffset = 0;
     TComponent* data = nullptr;
+
+    inline TComponent* dataPos()
+    {
+        return data + baseOffset;
+    }
 
   public:
     ComponentGroup() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
@@ -40,30 +48,76 @@ template <typename TComponent> class ComponentGroup
         const int32_t rightCount = rightMask * -missLeft;
         const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
 
+        // Check for capacity
         if (size + count > capacity)
+        {
             grow();
-        // Copy to the end of the list
-        memcpy(data + baseOffset + size, comps + leftCount, sizeof(TComponent) * rightCount);
+        }
+
+        // Copy to the end of the group
+        memcpy(dataPos() + size, comps + leftCount, sizeof(TComponent) * rightCount);
         // Copy components to the left of the tip
-        memcpy(data + baseOffset + tipOffset - leftCount, comps + 0, sizeof(TComponent) * leftCount);
+        memcpy(dataPos() + tipOffset - leftCount, comps + 0, sizeof(TComponent) * leftCount);
 
         size += rightCount;
     }
 
-    void addComponent(const TComponent& comp) { addComponent(&comp, 1); }
+    inline void addComponent(const TComponent& comp) { addComponent(&comp, 1); }
 
-    constexpr const TComponent* getDataIt() const { return data + baseOffset; }
-
-    constexpr const TComponent* getDataIt(int32_t& size) const
+    /**
+     * @brief Removes the given components based on their Ids.
+     *
+     * @param compIds Sorted list (ascending) of Ids whose components will be removed.
+     * @param count Size of the given component Ids list.
+     */
+    void remComponent(const int32_t* compIds, const int32_t count)
     {
-        size = this->size;
-        return data + baseOffset;
+        const int32_t rightSize = size - tipOffset;
+        int32_t leftComprCount = 0;
+
+        // Count the number of left compressions
+        for (int32_t i = 0; i < count; i++)
+        {
+            leftComprCount += signMask(compIds[i] - rightSize);
+        }
+
+        // Count the number of right compressions
+        int32_t rightComprCount = count - leftComprCount;
+
+        // Compress right all elements left of the tip
+        for (int32_t i = leftComprCount; i < rightComprCount; i++)
+        {
+            const int32_t cId = i;
+            const int32_t comprPos = compIds[cId];
+
+            // Calculate compression shifts
+            int32_t comprShifts = 1;
+            for (int32_t j = cId + 1; j < rightComprCount; j++)
+            {
+                const int32_t nextComprPos = compIds[cId + comprShifts];
+                const int32_t fetchLimit = comprPos + comprShifts + 1;
+                const int32_t incMask = signMask(nextComprPos - fetchLimit);
+                comprShifts += incMask; // Increase shift count
+                i += incMask;           // Can skip next compression
+            }
+
+            // Calculate amount of elements to be compressed right
+            const int32_t comprCount = comprPos - rightSize;
+
+            // Perform compression by moving memory blocks
+            memmove(dataPos() + comprShifts, dataPos(), comprCount);
+        }
+
+        // Compress left all elements right of the tip 
+
+        // Roll counter-clockwise to fill removed spaces
+
     }
 
-    constexpr int32_t getSize() const { return size; }
+    inline void remComponent(const int compId) { remComponent(&compId, 1); }
 
     // Should move base ptr, changes tipOffset, size is maintained
-    constexpr void rollClockwise(const int32_t count)
+    void rollClockwise(const int32_t count)
     {
         const int32_t toCpy = min(size, count);
         const int32_t stride = max(size, count);
@@ -71,7 +125,20 @@ template <typename TComponent> class ComponentGroup
         {
             grow(stride + toCpy);
         }
-        memcpy(data + baseOffset + stride, data + baseOffset, toCpy); // Roll data
+        memcpy(dataPos() + stride, dataPos(), toCpy); // Roll data
+        tipOffset -= toCpy;                                           // Decrease tipOffset
+        tipOffset += signMask(tipOffset) * size;                      // Wrap around
+
+        // Should Increase base ptr
+        baseOffset += toCpy;
+    }
+
+    // Should move base ptr, changes tipOffset, size is maintained
+    void rollCounterClockwise(const int32_t count)
+    {
+        const int32_t toCpy = min(baseOffset, min(count, size));
+        const int32_t stride = max(size, count);
+        memcpy(dataPos() - stride, dataPos(), toCpy); // Roll data
         tipOffset -= toCpy;                                           // Decrease tipOffset
         tipOffset += signMask(tipOffset) * size;                      // Wrap around
 
@@ -86,7 +153,7 @@ template <typename TComponent> class ComponentGroup
      * @param count
      * @return constexpr int32_t
      */
-    constexpr int32_t shiftClockwise(int32_t count)
+    int32_t shiftClockwise(int32_t count)
     {
         count = min(count, tipOffset);
         const int32_t mask = signMask(count - tipOffset);
@@ -96,11 +163,21 @@ template <typename TComponent> class ComponentGroup
         {
             grow(baseOffset + size + rollCount);
         }
-        memcpy(data + baseOffset + size, data + baseOffset, rollCount);       // Roll data
-        memcpy(data + baseOffset, data + baseOffset + rollCount, shiftCount); // Shift data
+        memcpy(dataPos() + size, dataPos(), rollCount);       // Roll data
+        memcpy(dataPos(), dataPos() + rollCount, shiftCount); // Shift data
         size += count;                                                        // Increases size to update end of array
         return count;                                                         // Returns how many slots left before tip
     }
+
+    inline const TComponent* getDataIt() const { return dataPos(); }
+
+    inline const TComponent* getDataIt(int32_t& size) const
+    {
+        size = this->size;
+        return dataPos();
+    }
+
+    inline int32_t getSize() const { return size; }
 
     /**
      * @brief Gets the debug string.
@@ -125,9 +202,24 @@ template <typename TComponent> class ComponentGroup
         }
         debugStr[capacity] = '\n';
         debugStr[debugSize + 1] = '\0';
-        debugStr[capacity + 1 + tipOffset] = '^';
+        debugStr[capacity + 1 + baseOffset + tipOffset] = '^';
         return debugStr;
     }
+};
+
+/**
+ * @brief Struct that represents the group hash
+ */
+struct GroupMask
+{
+    /**
+     * @brief Hash of all pointer types this mask represents.
+     */
+    intptr_t typePtr;
+    /**
+     * @brief Amount of types this mask represents.
+     */
+    int32_t typesCount;
 };
 
 } // namespace rv

@@ -2,9 +2,12 @@
 #define COMPONENTSTORAGE_HPP
 
 #include <cstdlib>
+#include <hash_map>
 #include <string>
 
 #include "ComponentGroup.hpp"
+
+using std::hash_map;
 
 namespace rv
 {
@@ -14,6 +17,9 @@ template <typename TComponent> class ComponentStorage
   private:
     int32_t capacity = 0;
     TComponent* data;
+    int32_t groupsCount;
+    intptr_t* groupMasks;
+    intptr_t* groupsLength;
     ComponentGroup<TComponent>* groups;
 
   public:
@@ -24,7 +30,11 @@ template <typename TComponent> class ComponentStorage
     {
     }
 
-    ~ComponentStorage() { free(data); }
+    ~ComponentStorage()
+    {
+        free(data);
+        free(groups);
+    }
 
     void grow(int32_t newCapacity = 0)
     {
@@ -35,6 +45,20 @@ template <typename TComponent> class ComponentStorage
         data = newData;
         capacity = grow;
     }
+
+    void addComponent(const TComponent* comps, int32_t count) { groups.addComponent(comps, count); }
+
+    void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
+    {
+        groups.addComponent(comps, count);
+    }
+};
+
+template <typename TComponent> struct ComponentMaskList
+{
+    const intptr_t mask;
+    const TComponent* comps;
+    const int32_t count;
 };
 
 } // namespace rv

@@ -38,20 +38,22 @@ int main(int argc, char** argv)
     cout << testCyclic.getDebugStr() << endl;
     testCyclic.addComponent("XZ", 2);
     cout << testCyclic.getDebugStr() << endl;
+    testCyclic.remComponent(9);
+    cout << testCyclic.getDebugStr() << endl;
 
     // while (true)
     // {
     //     // system("cls");
-
+    //
     //     // Start Delta-time
     //     static double dt = 0.03;
     //     static auto mStartTime = std::chrono::system_clock::now();
-
+    //
     //     // Update Systems
     //     movementSystem->update(dt);
     //     gravitySystem->update(dt);
     //     boundingSystem->update(dt);
-
+    //
     //     // Update Delta-time
     //     static auto mEndTime = std::chrono::system_clock::now();
     //     dt = std::chrono::duration_cast<std::chrono::nanoseconds>(mEndTime - mStartTime).count() * 1e-9;
