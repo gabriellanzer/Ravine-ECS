@@ -85,6 +85,8 @@ template <typename TComponent> class ComponentGroup
         // Count the number of right compressions
         int32_t rightComprCount = count - leftComprCount;
 
+        // Compress left all elements right of the tip 
+
         // Compress right all elements left of the tip
         for (int32_t i = leftComprCount; i < count; i++)
         {
@@ -111,8 +113,6 @@ template <typename TComponent> class ComponentGroup
         baseOffset += rightComprCount;
         tipOffset  -= rightComprCount;
         size -= rightComprCount;
-
-        // Compress left all elements right of the tip 
 
         // Roll counter-clockwise to fill removed spaces
         rollCounterClockwise(rightComprCount);
