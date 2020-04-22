@@ -69,8 +69,9 @@ template <typename TComponent> class ComponentGroup
      *
      * @param compIds Sorted list (ascending) of Ids whose components will be removed.
      * @param count Size of the given component Ids list.
+     * @return int32_t Amount of elements emptied to the right-side of the array.
      */
-    void remComponent(const int32_t* compIds, const int32_t count)
+    int32_t remComponent(const int32_t* compIds, const int32_t count)
     {
         const int32_t rightSize = size - tipOffset;
         int32_t leftComprCount = 0;
@@ -85,14 +86,14 @@ template <typename TComponent> class ComponentGroup
         int32_t rightComprCount = count - leftComprCount;
 
         // Compress right all elements left of the tip
-        for (int32_t i = leftComprCount; i < rightComprCount; i++)
+        for (int32_t i = leftComprCount; i < count; i++)
         {
             const int32_t cId = i;
             const int32_t comprPos = compIds[cId];
 
             // Calculate compression shifts
             int32_t comprShifts = 1;
-            for (int32_t j = cId + 1; j < rightComprCount; j++)
+            for (int32_t j = cId + 1; j < count; j++)
             {
                 const int32_t nextComprPos = compIds[cId + comprShifts];
                 const int32_t fetchLimit = comprPos + comprShifts + 1;
@@ -107,11 +108,16 @@ template <typename TComponent> class ComponentGroup
             // Perform compression by moving memory blocks
             memmove(dataPos() + comprShifts, dataPos(), comprCount);
         }
+        baseOffset += rightComprCount;
+        tipOffset  -= rightComprCount;
+        size -= rightComprCount;
 
         // Compress left all elements right of the tip 
 
         // Roll counter-clockwise to fill removed spaces
+        rollCounterClockwise(rightComprCount);
 
+        return leftComprCount;
     }
 
     inline void remComponent(const int compId) { remComponent(&compId, 1); }
@@ -119,31 +125,33 @@ template <typename TComponent> class ComponentGroup
     // Should move base ptr, changes tipOffset, size is maintained
     void rollClockwise(const int32_t count)
     {
-        const int32_t toCpy = min(size, count);
+        const int32_t toCopy = min(size, count);
         const int32_t stride = max(size, count);
-        if (baseOffset + stride + toCpy > capacity) // If there isn't enough space
+        if (baseOffset + stride + toCopy > capacity) // If there isn't enough space
         {
-            grow(stride + toCpy);
+            grow(stride + toCopy);
         }
-        memcpy(dataPos() + stride, dataPos(), toCpy); // Roll data
-        tipOffset -= toCpy;                                           // Decrease tipOffset
-        tipOffset += signMask(tipOffset) * size;                      // Wrap around
+        memcpy(dataPos() + stride, dataPos(), toCopy);  // Roll data
+        tipOffset -= toCopy;                            // Decrease tipOffset
+        tipOffset += signMask(tipOffset) * size;        // Wrap around
 
         // Should Increase base ptr
-        baseOffset += toCpy;
+        baseOffset += toCopy;
     }
 
     // Should move base ptr, changes tipOffset, size is maintained
     void rollCounterClockwise(const int32_t count)
     {
-        const int32_t toCpy = min(baseOffset, min(count, size));
-        const int32_t stride = max(size, count);
-        memcpy(dataPos() - stride, dataPos(), toCpy); // Roll data
-        tipOffset -= toCpy;                                           // Decrease tipOffset
-        tipOffset += signMask(tipOffset) * size;                      // Wrap around
+        const int32_t toCopy = min(baseOffset, min(count, size));
+        const int32_t srcPos = size - toCopy;
+        TComponent* dst = dataPos() - toCopy;
+        TComponent* src = dataPos() + srcPos;
+        memcpy(dst, src, toCopy);                       // Roll data
+        tipOffset += toCopy;                            // Increase tipOffset
+        tipOffset -= signMask(size - tipOffset) * size; // Wrap around
 
-        // Should Increase base ptr
-        baseOffset += toCpy;
+        // Should Decrease base ptr
+        baseOffset -= toCopy;
     }
 
     /**
