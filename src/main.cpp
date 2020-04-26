@@ -11,6 +11,8 @@
 
 using namespace rv;
 
+typedef int Physics;
+
 int main(int argc, char** argv)
 {
     // ISystem *gravitySystem = new GravitySystem();
@@ -31,6 +33,10 @@ int main(int argc, char** argv)
     ComponentGroup<char> testCyclic;
     const char* str = "testBemGrande";
     testCyclic.addComponent(str, 13);
+    cout << testCyclic.getDebugStr() << endl;
+    testCyclic.rollClockwise(2);
+    cout << testCyclic.getDebugStr() << endl;
+    testCyclic.rollCounterClockwise(2);
     cout << testCyclic.getDebugStr() << endl;
     testCyclic.rollClockwise(2);
     cout << testCyclic.getDebugStr() << endl;

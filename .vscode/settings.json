@@ -19,7 +19,10 @@
     "xlocale": "cpp",
     "xlocnum": "cpp",
     "xmemory": "cpp",
-    "xutility": "cpp"
+    "xutility": "cpp",
+    "utility": "cpp",
+    "tuple": "cpp",
+    "memory": "cpp"
   },
   "cmake.configureOnOpen": true,
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/"

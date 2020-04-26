@@ -142,13 +142,14 @@ template <typename TComponent> class ComponentGroup
     // Should move base ptr, changes tipOffset, size is maintained
     void rollCounterClockwise(const int32_t count)
     {
-        const int32_t toCopy = min(baseOffset, min(count, size));
+        const int32_t dstOffset = min(baseOffset, count);
+        const int32_t toCopy = min(dstOffset, size);
         const int32_t srcPos = size - toCopy;
-        TComponent* dst = dataPos() - toCopy;
+        TComponent* dst = dataPos() - dstOffset;
         TComponent* src = dataPos() + srcPos;
         memcpy(dst, src, toCopy);                       // Roll data
         tipOffset += toCopy;                            // Increase tipOffset
-        tipOffset -= signMask(size - tipOffset) * size; // Wrap around
+        tipOffset -= signMask(size - tipOffset - 1) * size; // Wrap around
 
         // Should Decrease base ptr
         baseOffset -= toCopy;
