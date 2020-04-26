@@ -86,6 +86,34 @@ template <typename TComponent> class ComponentGroup
         int32_t rightComprCount = count - leftComprCount;
 
         // Compress left all elements right of the tip 
+        for (int32_t i = leftComprCount - 1; i >= 0; i--)
+        {
+            const int32_t cId = i;
+            const int32_t comprPos = compIds[cId];
+
+            // Calculate compression shifts
+            int32_t comprShifts = 1;
+            for (int32_t j = cId - 1; j >= 0; j--)
+            {
+                const int32_t nextComprPos = compIds[cId - comprShifts];
+                const int32_t fetchLimit = comprPos - comprShifts - 1;
+                const int32_t incMask = signMask(fetchLimit - nextComprPos);
+                comprShifts += incMask; // Increase shift count
+                i -= incMask;           // Can skip next compression
+            }
+
+            // Actual position of the component without wrapping
+            const int32_t actualPos = tipOffset + comprPos;
+
+            // Calculate amount of elements to be compressed left
+            const int32_t comprCount = size - actualPos - 1;
+
+            // Perform compression by moving memory blocks
+            const int32_t srcPos = actualPos + 1;
+            const int32_t dstPos = srcPos - comprShifts;
+            memmove(dataPos() + dstPos, dataPos() + srcPos, comprCount);
+        }
+        size -= leftComprCount;
 
         // Compress right all elements left of the tip
         for (int32_t i = leftComprCount; i < count; i++)

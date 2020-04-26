@@ -34,18 +34,26 @@ int main(int argc, char** argv)
     const char* str = "testBemGrande";
     testCyclic.addComponent(str, 13);
     cout << testCyclic.getDebugStr() << endl;
-    testCyclic.rollClockwise(2);
+    testCyclic.rollClockwise(4);
     cout << testCyclic.getDebugStr() << endl;
-    testCyclic.rollCounterClockwise(2);
+    testCyclic.rollCounterClockwise(4);
     cout << testCyclic.getDebugStr() << endl;
-    testCyclic.rollClockwise(2);
+    testCyclic.rollClockwise(4);
     cout << testCyclic.getDebugStr() << endl;
     testCyclic.shiftClockwise(2);
     cout << testCyclic.getDebugStr() << endl;
     testCyclic.addComponent("XZ", 2);
     cout << testCyclic.getDebugStr() << endl;
-    testCyclic.remComponent(9);
+    int* compRem = new int[]{8,9};
+    testCyclic.remComponent(compRem, 2);
     cout << testCyclic.getDebugStr() << endl;
+    compRem[0] = 1; compRem[1] = 2;
+    testCyclic.remComponent(compRem, 2);
+    cout << testCyclic.getDebugStr() << endl;
+    compRem[0] = 0; compRem[1] = 1;
+    testCyclic.remComponent(compRem, 2);
+    cout << testCyclic.getDebugStr() << endl;
+    delete[] compRem;
 
     // while (true)
     // {
