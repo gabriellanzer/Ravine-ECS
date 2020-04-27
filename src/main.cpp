@@ -11,8 +11,6 @@
 
 using namespace rv;
 
-typedef int Physics;
-
 int main(int argc, char** argv)
 {
     // ISystem *gravitySystem = new GravitySystem();
@@ -30,10 +28,16 @@ int main(int argc, char** argv)
     // ComponentsManager::createComponents<VelocityComponent>({});
     // ComponentsManager::createComponents<PositionComponent>({});
 
+    // Creation Test
     ComponentGroup<char> testCyclic;
+    cout << testCyclic.getDebugStr() << endl;
+
+    // Initial Adition Test
     const char* str = "testBemGrande";
     testCyclic.addComponent(str, 13);
     cout << testCyclic.getDebugStr() << endl;
+
+    // Base Operations Test
     testCyclic.rollClockwise(4);
     cout << testCyclic.getDebugStr() << endl;
     testCyclic.rollCounterClockwise(4);
@@ -42,12 +46,16 @@ int main(int argc, char** argv)
     cout << testCyclic.getDebugStr() << endl;
     testCyclic.shiftClockwise(2);
     cout << testCyclic.getDebugStr() << endl;
+
+    // Adition Test
     testCyclic.addComponent("XZ", 2);
     cout << testCyclic.getDebugStr() << endl;
+
+    // Removal Test
     int* compRem = new int[]{8,9};
     testCyclic.remComponent(compRem, 2);
     cout << testCyclic.getDebugStr() << endl;
-    compRem[0] = 1; compRem[1] = 2;
+    compRem[0] = 0; compRem[1] = 12;
     testCyclic.remComponent(compRem, 2);
     cout << testCyclic.getDebugStr() << endl;
     compRem[0] = 0; compRem[1] = 1;
