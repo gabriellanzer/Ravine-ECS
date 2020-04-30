@@ -64,7 +64,7 @@ inline intptr_t* getMaskCombinations(intptr_t* seedMasks, const int32_t maskCoun
             combs[combIt] = seedMasks[compIt[0]];
             for (int32_t i = 1; i < compCount; i++)
             {
-                combs[combIt] += seedMasks[compIt[i]];
+                combs[combIt] ^= seedMasks[compIt[i]];
             }
 
             // Find current incrementing iterator
