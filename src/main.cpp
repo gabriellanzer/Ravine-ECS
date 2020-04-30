@@ -52,6 +52,13 @@ int main(int argc, char** argv)
     for(auto maskGroupPair : storage.groups) { cout << maskGroupPair.first.typePtr << "|" << maskGroupPair.first.typesCount << endl; }
     cout << "END" << endl;
 
+    masks[0] = 0;
+    masks[1] = 1;
+    masks[2] = 2;
+
+    int32_t combCount;
+    getMaskCombinations(masks, 3, combCount);
+
     // ComponentsManager::createComponents<PositionComponent>({});
     // ComponentsManager::createComponents<VelocityComponent>({});
     // ComponentsManager::createComponents<VelocityComponent>({});

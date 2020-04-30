@@ -57,20 +57,20 @@ inline intptr_t* getMaskCombinations(intptr_t* seedMasks, const int32_t maskCoun
         }
 
         // Calcualte every combination of (N,compCount)
-        int32_t curIncIt = 0;
+        int32_t curIncIt = compCount - 1;
         do
         {
             // Compute current Combinations
             combs[combIt] = seedMasks[compIt[0]];
             for (int32_t i = 1; i < compCount; i++)
             {
-                combs[combIt] ^= seedMasks[compIt[i]];
+                combs[combIt] += seedMasks[compIt[i]];
             }
 
             // Find current incrementing iterator
-            for (int32_t i = compCount - 1; i >= 0; i--)
+            for (int32_t i = compCount - 1; i >= 1; i--)
             {
-                const int32_t limit = compCount - i - maskCount;
+                const int32_t limit = maskCount - (compCount - i);
                 curIncIt -= 1 - signMask(compIt[curIncIt] - limit);
             }
 
@@ -78,13 +78,14 @@ inline intptr_t* getMaskCombinations(intptr_t* seedMasks, const int32_t maskCoun
             int32_t lastComp = ++compIt[curIncIt];
             for (int32_t i = curIncIt + 1; i < compCount; i++)
             {
-                compIt[curIncIt] = ++lastComp;
+                compIt[i] = ++lastComp;
             }
+            // Reset curent incrementing cursor
             curIncIt = compCount - 1;
 
             // Increment combination iterator
             combIt++;
-        } while (compIt[0] != (maskCount - compCount));
+        } while (compIt[0] <= (maskCount - compCount));
     }
 
     delete[] compIt;
