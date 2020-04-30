@@ -245,7 +245,7 @@ template <typename TComponent> class ComponentGroup
 };
 
 /**
- * @brief Struct that represents the group hash
+ * @brief Struct that represents the group hash.
  */
 struct GroupMask
 {
@@ -257,6 +257,22 @@ struct GroupMask
      * @brief Amount of types this mask represents.
      */
     int32_t typesCount;
+};
+
+/**
+ * @brief Group Mask Compare operation.
+ */
+struct GroupMaskCmp {
+    bool operator()(const GroupMask& a, const GroupMask& b) const {
+        if(a.typesCount != b.typesCount)
+        {
+            return a.typesCount > b.typesCount;
+        }
+        else
+        {
+            return a.typePtr < b.typePtr;
+        }
+    }
 };
 
 } // namespace rv

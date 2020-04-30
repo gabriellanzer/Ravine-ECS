@@ -1,15 +1,24 @@
 #include <chrono>
 #include <iostream>
 
-#include "ComponentsManager.hpp"
+// #include "BoundingSystem.hpp"
+// #include "GravitySystem.h"
+// #include "MovementSystem.h"
 
-#include "BoundingSystem.hpp"
-#include "GravitySystem.h"
-#include "MovementSystem.h"
-
+#include "ComponentStorage.hpp"
 #include "ComponentGroup.hpp"
 
+using std::cout;
+using std::endl;
+
 using namespace rv;
+
+template<typename Type>
+Type* GetUniquePtr()
+{
+    static Type* ptr = new Type;
+    return ptr;
+}
 
 int main(int argc, char** argv)
 {
@@ -18,6 +27,30 @@ int main(int argc, char** argv)
     // ISystem *boundingSystem = new BoundingSystem();
     cout.setf(std::ios::fixed, std::ios::floatfield);
     cout.precision(9);
+
+    ComponentStorage<char> storage;
+    intptr_t masks[] = {
+        (intptr_t)GetUniquePtr<char>(),
+        (intptr_t)GetUniquePtr<int>(),
+        (intptr_t)GetUniquePtr<float>()
+    };
+    storage.getComponentGroup(masks, 2);
+    for(auto maskGroupPair : storage.groups) { cout << maskGroupPair.first.typePtr << "|" << maskGroupPair.first.typesCount << endl; }
+    cout << "END" << endl;
+    intptr_t temp = masks[0];
+    masks[0] = masks[1];
+    masks[1] = temp;
+    storage.getComponentGroup(masks, 2);
+    for(auto maskGroupPair : storage.groups) { cout << maskGroupPair.first.typePtr << "|" << maskGroupPair.first.typesCount << endl; }
+    cout << "END" << endl;
+    masks[1] = (intptr_t)GetUniquePtr<double>();
+    storage.getComponentGroup(masks, 1);
+    for(auto maskGroupPair : storage.groups) { cout << maskGroupPair.first.typePtr << "|" << maskGroupPair.first.typesCount << endl; }
+    cout << "END" << endl;
+    masks[1] = (intptr_t)GetUniquePtr<short>();
+    storage.getComponentGroup(masks, 3);
+    for(auto maskGroupPair : storage.groups) { cout << maskGroupPair.first.typePtr << "|" << maskGroupPair.first.typesCount << endl; }
+    cout << "END" << endl;
 
     // ComponentsManager::createComponents<PositionComponent>({});
     // ComponentsManager::createComponents<VelocityComponent>({});
@@ -32,7 +65,7 @@ int main(int argc, char** argv)
     ComponentGroup<char> testCyclic;
     cout << testCyclic.getDebugStr() << endl;
 
-    // Initial Adition Test
+    // Initial Addition Test
     const char* str = "testBemGrande";
     testCyclic.addComponent(str, 13);
     cout << testCyclic.getDebugStr() << endl;
@@ -47,7 +80,7 @@ int main(int argc, char** argv)
     testCyclic.shiftClockwise(2);
     cout << testCyclic.getDebugStr() << endl;
 
-    // Adition Test
+    // Addition Test
     testCyclic.addComponent("XZ", 2);
     cout << testCyclic.getDebugStr() << endl;
 
