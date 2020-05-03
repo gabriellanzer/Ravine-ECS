@@ -15,6 +15,7 @@ template <typename TComponent> class ComponentStorage
     typedef ComponentGroup<TComponent> ComponentGroup;
     typedef std::multimap<intptr_t, GroupMask> GroupsRegistry;
     typedef std::map<GroupMask, ComponentGroup, GroupMaskCmp> GroupMaskMap;
+    typedef typename GroupMaskMap::iterator GroupIt;
 
   private:
     int32_t capacity = 0;
@@ -51,16 +52,16 @@ template <typename TComponent> class ComponentStorage
         capacity = grow;
     }
 
-    typename GroupMaskMap::iterator getComponentGroup(const intptr_t* masks, const int32_t maskCount)
+    GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
     {
         // Compute Group Mask
         GroupMask mask(masks, maskCount);
 
         // Get existing group
-        typename GroupMaskMap::iterator it = groups.find(mask);
+        GroupIt it = groups.find(mask);
         if (it != groups.end())
         {
-            return it->second;
+            return it;
         }
 
         // Create new Group
@@ -92,8 +93,25 @@ template <typename TComponent> class ComponentStorage
 
     void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
     {
-        ComponentGroup group = getComponentGroup(masks, maskCount);
+        // TODO: Process many groups, each with different masks
+        GroupIt groupIt = getComponentGroup(masks, maskCount);
+
+        // Make space for the new components
+        GroupIt it = groupIt;
+        for (it++; it != groups.end(); it++)
+        {
+            it->second.rollClockwise(count);
+        }
+
+        // Hold group reference
+        ComponentGroup& group = groupIt->second;
+
+        // Make space for the new components in the group
+        group.shiftClockwise(count);
+
+        // Add the new components in the group
         group.addComponent(comps, count);
+        
     }
 };
 

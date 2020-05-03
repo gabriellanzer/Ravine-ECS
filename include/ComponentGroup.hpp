@@ -212,6 +212,10 @@ template <typename TComponent> struct ComponentGroup
         return count;                                         // Returns how many slots left before tip
     }
 
+    // TODO: Implement Shift CounterClockwise
+    // TODO: Implement Swap of Components
+    // TODO: Implement InsertComponent (on a specific location)
+
     inline const TComponent* getDataIt() const { return dataPos(); }
 
     inline const TComponent* getDataIt(int32_t& size) const
