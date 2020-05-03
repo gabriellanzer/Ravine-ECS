@@ -20,7 +20,8 @@ int main(int argc, char** argv)
         (intptr_t)2
     };
     const char* components = "TestComps";
-    storage.addComponent(masks, 3, components, sizeof(components));
+    storage.addComponent(masks, 2, components, 4);
+    storage.addComponent(masks, 3, components, 9);
 
     system("pause");
     return 0;

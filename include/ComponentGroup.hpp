@@ -12,39 +12,18 @@ namespace rv
 // TODO: Turn this into a struct
 template <typename TComponent> struct ComponentGroup
 {
-  public:
+    TComponent* const& data;
     int32_t baseOffset = 0;
     int32_t size = 0;
     int32_t capacity = 0;
     int32_t tipOffset = 0;
-    TComponent* data = nullptr;
 
+    // Usefull shortcut for this operation
     inline TComponent* dataPos() { return data + baseOffset; }
 
-    ComponentGroup() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
-
-    explicit ComponentGroup(const int32_t capacity)
-        : capacity(capacity), data(static_cast<TComponent*>(malloc(capacity * sizeof(TComponent))))
+    ComponentGroup(TComponent* const& storageData, const int32_t storageOffset)
+        : data(storageData), baseOffset(storageOffset)
     {
-    }
-
-    void setup(TComponent* storageData, int32_t storageOffset)
-    {
-        this->baseOffset = storageOffset;
-        this->size = 0;
-        this->capacity = 0;
-        this->tipOffset = 0;
-        this->data = storageData;
-    }
-
-    void grow(int32_t newCapacity = 0)
-    {
-        const int32_t grow = max(capacity, newCapacity) * 1.5f;
-        TComponent* newData = static_cast<TComponent*>(malloc(grow * sizeof(TComponent)));
-        memcpy(newData, data, capacity * sizeof(TComponent));
-        free(data);
-        data = newData;
-        capacity = grow;
     }
 
     void addComponent(const TComponent* comps, const uint32_t count)
@@ -53,13 +32,6 @@ template <typename TComponent> struct ComponentGroup
         const int32_t rightMask = signMask(missLeft);
         const int32_t rightCount = rightMask * -missLeft;
         const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
-
-        // Check for capacity
-        if (size + count > capacity)
-        {
-            grow();
-        }
-
         // Copy to the end of the group
         memcpy(dataPos() + size, comps + leftCount, sizeof(TComponent) * rightCount);
         // Copy components to the left of the tip
@@ -161,10 +133,6 @@ template <typename TComponent> struct ComponentGroup
     {
         const int32_t toCopy = min(size, count);
         const int32_t stride = max(size, count);
-        if (baseOffset + stride + toCopy > capacity) // If there isn't enough space
-        {
-            grow(stride + toCopy);
-        }
         memcpy(dataPos() + stride, dataPos(), toCopy); // Roll data
         tipOffset -= toCopy;                           // Decrease tipOffset
         tipOffset += signMask(tipOffset) * size;       // Wrap around
@@ -202,10 +170,6 @@ template <typename TComponent> struct ComponentGroup
         const int32_t mask = signMask(count - tipOffset);
         const int32_t shiftCount = (tipOffset - count) * mask;
         const int32_t rollCount = count * mask;
-        if (baseOffset + size + rollCount > capacity) // If there isn't enough space
-        {
-            grow(baseOffset + size + rollCount);
-        }
         memcpy(dataPos() + size, dataPos(), rollCount);       // Roll data
         memcpy(dataPos(), dataPos() + rollCount, shiftCount); // Shift data
         size += count;                                        // Increases size to update end of array
@@ -215,16 +179,6 @@ template <typename TComponent> struct ComponentGroup
     // TODO: Implement Shift CounterClockwise
     // TODO: Implement Swap of Components
     // TODO: Implement InsertComponent (on a specific location)
-
-    inline const TComponent* getDataIt() const { return dataPos(); }
-
-    inline const TComponent* getDataIt(int32_t& size) const
-    {
-        size = this->size;
-        return dataPos();
-    }
-
-    inline int32_t getSize() const { return size; }
 
     /**
      * @brief Gets the debug string.

@@ -14,10 +14,11 @@ template <typename TComponent> class ComponentStorage
 {
     typedef ComponentGroup<TComponent> ComponentGroup;
     typedef std::multimap<intptr_t, GroupMask> GroupsRegistry;
-    typedef std::map<GroupMask, ComponentGroup, GroupMaskCmp> GroupMaskMap;
+    typedef std::map<GroupMask, ComponentGroup*, GroupMaskCmp> GroupMaskMap;
     typedef typename GroupMaskMap::iterator GroupIt;
 
   private:
+    int32_t size = 0;
     int32_t capacity = 0;
     TComponent* data;
 
@@ -29,11 +30,6 @@ template <typename TComponent> class ComponentStorage
     GroupMaskMap groups;
     GroupsRegistry groupsRegistry;
     ComponentStorage() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
-
-    explicit ComponentStorage(const int32_t capacity)
-        : capacity(capacity), data(static_cast<TComponent*>(malloc(capacity * sizeof(TComponent))))
-    {
-    }
 
     ~ComponentStorage()
     {
@@ -65,7 +61,7 @@ template <typename TComponent> class ComponentStorage
         }
 
         // Create new Group
-        ComponentGroup group;
+        ComponentGroup* group;
         it = groups.emplace(mask, group).first;
 
         // Setup
@@ -76,23 +72,27 @@ template <typename TComponent> class ComponentStorage
         {
             if (i == groupPos - 1)
             {
-                ComponentGroup& lastGroup = maskGroupPair.second;
-                baseOffset = lastGroup.baseOffset + lastGroup.size;
+                ComponentGroup* lastGroup = maskGroupPair.second;
+                baseOffset = lastGroup->baseOffset + lastGroup->size;
                 break;
             }
             i++;
         }
-        it->second.setup(data, baseOffset);
+        it->second = new ComponentGroup(data, baseOffset);
 
         // TODO: Compute all combinations of masks and perform group registration
 
         return it;
     }
 
-    // void addComponent(const TComponent* comps, int32_t count) { groups.addComponent(comps, count); }
-
     void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
     {
+        // Check if we have enough space
+        if (size + count >= capacity)
+        {
+            grow();
+        }
+
         // TODO: Process many groups, each with different masks
         GroupIt groupIt = getComponentGroup(masks, maskCount);
 
@@ -100,18 +100,20 @@ template <typename TComponent> class ComponentStorage
         GroupIt it = groupIt;
         for (it++; it != groups.end(); it++)
         {
-            it->second.rollClockwise(count);
+            it->second->rollClockwise(count);
         }
 
         // Hold group reference
-        ComponentGroup& group = groupIt->second;
+        ComponentGroup* group = groupIt->second;
 
         // Make space for the new components in the group
-        group.shiftClockwise(count);
+        group->shiftClockwise(count);
 
         // Add the new components in the group
-        group.addComponent(comps, count);
-        
+        group->addComponent(comps, count);
+
+        // Increase Used Size
+        size += count;
     }
 };
 
