@@ -9,26 +9,32 @@
 namespace rv
 {
 
-template <typename TComponent> class ComponentGroup
+// TODO: Turn this into a struct
+template <typename TComponent> struct ComponentGroup
 {
-  private:
+  public:
     int32_t baseOffset = 0;
     int32_t size = 0;
     int32_t capacity = 0;
     int32_t tipOffset = 0;
     TComponent* data = nullptr;
 
-    inline TComponent* dataPos()
-    {
-        return data + baseOffset;
-    }
+    inline TComponent* dataPos() { return data + baseOffset; }
 
-  public:
     ComponentGroup() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
 
     explicit ComponentGroup(const int32_t capacity)
         : capacity(capacity), data(static_cast<TComponent*>(malloc(capacity * sizeof(TComponent))))
     {
+    }
+
+    void setup(TComponent* storageData, int32_t storageOffset)
+    {
+        this->baseOffset = storageOffset;
+        this->size = 0;
+        this->capacity = 0;
+        this->tipOffset = 0;
+        this->data = storageData;
     }
 
     void grow(int32_t newCapacity = 0)
@@ -85,7 +91,7 @@ template <typename TComponent> class ComponentGroup
         // Count the number of right compressions
         int32_t rightComprCount = count - leftComprCount;
 
-        // Compress left all elements right of the tip 
+        // Compress left all elements right of the tip
         for (int32_t i = leftComprCount - 1; i >= 0; i--)
         {
             const int32_t cId = i;
@@ -139,7 +145,7 @@ template <typename TComponent> class ComponentGroup
             memmove(dataPos() + comprShifts, dataPos(), comprCount);
         }
         baseOffset += rightComprCount;
-        tipOffset  -= rightComprCount;
+        tipOffset -= rightComprCount;
         size -= rightComprCount;
 
         // Roll counter-clockwise to fill removed spaces
@@ -159,9 +165,9 @@ template <typename TComponent> class ComponentGroup
         {
             grow(stride + toCopy);
         }
-        memcpy(dataPos() + stride, dataPos(), toCopy);  // Roll data
-        tipOffset -= toCopy;                            // Decrease tipOffset
-        tipOffset += signMask(tipOffset) * size;        // Wrap around
+        memcpy(dataPos() + stride, dataPos(), toCopy); // Roll data
+        tipOffset -= toCopy;                           // Decrease tipOffset
+        tipOffset += signMask(tipOffset) * size;       // Wrap around
 
         // Should Increase base ptr
         baseOffset += toCopy;
@@ -175,8 +181,8 @@ template <typename TComponent> class ComponentGroup
         const int32_t srcPos = size - toCopy;
         TComponent* dst = dataPos() - dstOffset;
         TComponent* src = dataPos() + srcPos;
-        memcpy(dst, src, toCopy);                       // Roll data
-        tipOffset += toCopy;                            // Increase tipOffset
+        memcpy(dst, src, toCopy);                           // Roll data
+        tipOffset += toCopy;                                // Increase tipOffset
         tipOffset -= signMask(size - tipOffset - 1) * size; // Wrap around
 
         // Should Decrease base ptr
@@ -202,8 +208,8 @@ template <typename TComponent> class ComponentGroup
         }
         memcpy(dataPos() + size, dataPos(), rollCount);       // Roll data
         memcpy(dataPos(), dataPos() + rollCount, shiftCount); // Shift data
-        size += count;                                                        // Increases size to update end of array
-        return count;                                                         // Returns how many slots left before tip
+        size += count;                                        // Increases size to update end of array
+        return count;                                         // Returns how many slots left before tip
     }
 
     inline const TComponent* getDataIt() const { return dataPos(); }
@@ -249,6 +255,14 @@ template <typename TComponent> class ComponentGroup
  */
 struct GroupMask
 {
+    GroupMask(const intptr_t* masks, const int32_t count) : typesCount(count)
+    {
+        typePtr = masks[0];
+        for (size_t i = 1; i < typesCount; i++)
+        {
+            typePtr ^= masks[i];
+        }
+    }
     /**
      * @brief Hash of all pointer types this mask represents.
      */
@@ -262,9 +276,11 @@ struct GroupMask
 /**
  * @brief Group Mask Compare operation.
  */
-struct GroupMaskCmp {
-    bool operator()(const GroupMask& a, const GroupMask& b) const {
-        if(a.typesCount != b.typesCount)
+struct GroupMaskCmp
+{
+    bool operator()(const GroupMask& a, const GroupMask& b) const
+    {
+        if (a.typesCount != b.typesCount)
         {
             return a.typesCount > b.typesCount;
         }

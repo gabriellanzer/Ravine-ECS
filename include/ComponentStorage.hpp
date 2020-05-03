@@ -13,6 +13,7 @@ namespace rv
 template <typename TComponent> class ComponentStorage
 {
     typedef ComponentGroup<TComponent> ComponentGroup;
+    typedef std::multimap<intptr_t, GroupMask> GroupsRegistry;
     typedef std::map<GroupMask, ComponentGroup, GroupMaskCmp> GroupMaskMap;
 
   private:
@@ -20,7 +21,12 @@ template <typename TComponent> class ComponentStorage
     TComponent* data;
 
   public:
+    /**
+     * @brief Organized holding of groups based on their representative mask values.
+     * Aka.:
+     */
     GroupMaskMap groups;
+    GroupsRegistry groupsRegistry;
     ComponentStorage() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
 
     explicit ComponentStorage(const int32_t capacity)
@@ -45,17 +51,11 @@ template <typename TComponent> class ComponentStorage
         capacity = grow;
     }
 
-    ComponentGroup& getComponentGroup(const intptr_t* masks, const int32_t maskCount)
+    typename GroupMaskMap::iterator getComponentGroup(const intptr_t* masks, const int32_t maskCount)
     {
         // Compute Group Mask
-        intptr_t resMask = masks[0];
-        for (int32_t i = 1; i < maskCount; i++)
-        {
-            resMask ^= masks[i];
-        }
+        GroupMask mask(masks, maskCount);
 
-        GroupMask mask = GroupMask{resMask, maskCount};
-        
         // Get existing group
         typename GroupMaskMap::iterator it = groups.find(mask);
         if (it != groups.end())
@@ -66,15 +66,35 @@ template <typename TComponent> class ComponentStorage
         // Create new Group
         ComponentGroup group;
         it = groups.emplace(mask, group).first;
-        return it->second;
+
+        // Setup
+        const int32_t groupPos = std::distance(groups.begin(), it);
+        int32_t baseOffset = 0;
+        int32_t i = 0;
+        for (auto maskGroupPair : groups)
+        {
+            if (i == groupPos - 1)
+            {
+                ComponentGroup& lastGroup = maskGroupPair.second;
+                baseOffset = lastGroup.baseOffset + lastGroup.size;
+                break;
+            }
+            i++;
+        }
+        it->second.setup(data, baseOffset);
+
+        // TODO: Compute all combinations of masks and perform group registration
+
+        return it;
     }
 
     // void addComponent(const TComponent* comps, int32_t count) { groups.addComponent(comps, count); }
 
-    // void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
-    // {
-    //     intptr_t combinedMask groups.addComponent(comps, count);
-    // }
+    void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
+    {
+        ComponentGroup group = getComponentGroup(masks, maskCount);
+        group.addComponent(comps, count);
+    }
 };
 
 } // namespace rv
