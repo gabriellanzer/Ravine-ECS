@@ -7,121 +7,121 @@ using std::unordered_map;
 namespace rv
 {
 
-class ComponentsList
-{
-    unordered_map<ComponentsList*, size_t*> relativeOffsets;
-    unordered_map<ComponentsList*, size_t*> relativeSizes;
-    const uint32_t dataTypeSize;
-
-  public:
-    ~ComponentsList() = default;
-    ComponentsList() : dataTypeSize(UINT32_MAX) {}
-
-    explicit ComponentsList(const uint32_t dataTypeSize) : dataTypeSize(dataTypeSize) {}
-
-    size_t* linkRelativeOffset(ComponentsList* relativeList)
+    class ComponentsList
     {
-        const auto res = relativeOffsets.emplace(relativeList, new size_t(0));
-        return res.first->second;
-    }
+        unordered_map<ComponentsList*, size_t*> relativeOffsets;
+        unordered_map<ComponentsList*, size_t*> relativeSizes;
+        const uint32_t dataTypeSize;
 
-    size_t* linkRelativeSize(ComponentsList* relativeList)
-    {
-        const auto res = relativeSizes.emplace(relativeList, new size_t(0));
-        return res.first->second;
-    }
+      public:
+        ~ComponentsList() = default;
+        ComponentsList() : dataTypeSize(UINT32_MAX) {}
 
-    size_t* getRelativeOffset(ComponentsList* relativeList)
-    {
-        const auto it = relativeOffsets.find(relativeList);
-        if (it != relativeOffsets.end())
+        explicit ComponentsList(const uint32_t dataTypeSize) : dataTypeSize(dataTypeSize) {}
+
+        size_t* linkRelativeOffset(ComponentsList* relativeList)
         {
-            return it->second;
+            const auto res = relativeOffsets.emplace(relativeList, new size_t(0));
+            return res.first->second;
         }
-        return nullptr;
-    }
 
-    size_t* getRelativeSize(ComponentsList* relativeList)
-    {
-        const auto it = relativeSizes.find(relativeList);
-        if (it != relativeSizes.end())
+        size_t* linkRelativeSize(ComponentsList* relativeList)
         {
-            return it->second;
+            const auto res = relativeSizes.emplace(relativeList, new size_t(0));
+            return res.first->second;
         }
-        return nullptr;
-    }
 
-    void incrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
-    {
-        const auto it = relativeOffsets.find(relativeList);
-        if (it != relativeOffsets.end())
+        size_t* getRelativeOffset(ComponentsList* relativeList)
         {
-            if (*it->second > startPos)
+            const auto it = relativeOffsets.find(relativeList);
+            if (it != relativeOffsets.end())
             {
-                *it->second += count;
+                return it->second;
+            }
+            return nullptr;
+        }
+
+        size_t* getRelativeSize(ComponentsList* relativeList)
+        {
+            const auto it = relativeSizes.find(relativeList);
+            if (it != relativeSizes.end())
+            {
+                return it->second;
+            }
+            return nullptr;
+        }
+
+        void incrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
+        {
+            const auto it = relativeOffsets.find(relativeList);
+            if (it != relativeOffsets.end())
+            {
+                if (*it->second > startPos)
+                {
+                    *it->second += count;
+                }
             }
         }
-    }
 
-    void incrementRelativeOffsets(const size_t startPos, const size_t count = 1)
-    {
-        for (const auto it : relativeOffsets)
+        void incrementRelativeOffsets(const size_t startPos, const size_t count = 1)
         {
-            if (*it.second > startPos)
+            for (const auto it : relativeOffsets)
             {
-                *it.second += count;
+                if (*it.second > startPos)
+                {
+                    *it.second += count;
+                }
             }
         }
-    }
 
-    void incrementRelativeSize(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
-    {
-        const auto itOffset = relativeOffsets.find(relativeList);
-        const auto itSize = relativeSizes.find(relativeList);
-        if (itOffset != relativeOffsets.end())
+        void incrementRelativeSize(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
         {
-            if (*itOffset->second >= startPos)
+            const auto itOffset = relativeOffsets.find(relativeList);
+            const auto itSize = relativeSizes.find(relativeList);
+            if (itOffset != relativeOffsets.end())
             {
-                *itSize->second += count;
+                if (*itOffset->second >= startPos)
+                {
+                    *itSize->second += count;
+                }
             }
         }
-    }
 
-    void decrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
-    {
-        const auto it = relativeOffsets.find(relativeList);
-        if (it != relativeOffsets.end())
+        void decrementRelativeOffset(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
         {
-            if (*it->second > startPos)
+            const auto it = relativeOffsets.find(relativeList);
+            if (it != relativeOffsets.end())
             {
-                *it->second -= count;
+                if (*it->second > startPos)
+                {
+                    *it->second -= count;
+                }
             }
         }
-    }
 
-    void decreaseRelativeOffsets(const size_t startPos, const size_t count = 1)
-    {
-        for (const auto it : relativeOffsets)
+        void decreaseRelativeOffsets(const size_t startPos, const size_t count = 1)
         {
-            if (*it.second > startPos)
+            for (const auto it : relativeOffsets)
             {
-                *it.second -= count;
+                if (*it.second > startPos)
+                {
+                    *it.second -= count;
+                }
             }
         }
-    }
 
-    void decrementRelativeSizes(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
-    {
-        const auto it = relativeSizes.find(relativeList);
-        if (it != relativeSizes.end())
+        void decrementRelativeSizes(ComponentsList* relativeList, const size_t startPos, const size_t count = 1)
         {
-            if (*it->second > startPos)
+            const auto it = relativeSizes.find(relativeList);
+            if (it != relativeSizes.end())
             {
-                *it->second -= count;
+                if (*it->second > startPos)
+                {
+                    *it->second -= count;
+                }
             }
         }
-    }
-};
+    };
 
 } // namespace rv
 
