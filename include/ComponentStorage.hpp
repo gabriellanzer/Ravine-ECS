@@ -71,20 +71,15 @@ template <typename TComponent> class ComponentStorage
         // Create new Group
     	it = groups.insert(it, GroupMaskPair(mask, nullptr));
 
-        // Setup
-        const int32_t groupPos = std::distance(groups.begin(), it);
+		// Proper Initialization
         int32_t baseOffset = 0;
-        int32_t i = 0;
-        for (auto maskGroupPair : groups)
-        {
-            if (i == groupPos - 1)
-            {
-                ComponentGroup* lastGroup = maskGroupPair.second;
-                baseOffset = lastGroup->baseOffset + lastGroup->size;
-                break;
-            }
-            i++;
-        }
+		if(it != groups.begin())
+		{
+        	GroupIt lastGroupIt = it;
+			--lastGroupIt;
+			ComponentGroup* lastGroup = lastGroupIt->second;
+			baseOffset = lastGroup->baseOffset + lastGroup->size;
+		}
         it->second = new ComponentGroup(data, baseOffset);
 
         // TODO: Compute all combinations of masks and perform group registration
@@ -92,7 +87,7 @@ template <typename TComponent> class ComponentStorage
         // intptr_t* combintations = getMaskCombinations(masks, maskCount, combCount);
         // for (int32_t i = 0; i < combCount; i++)
         // {
-        // 	groupsRegistry.find();
+        // 	GroupsRegIt regIt = groupsRegistry.find();
         // }
 
         return it;
