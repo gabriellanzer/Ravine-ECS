@@ -36,7 +36,6 @@ template <typename TComponent> struct ComponentGroup
         memcpy(dataPos() + size, comps + leftCount, sizeof(TComponent) * rightCount);
         // Copy components to the left of the tip
         memcpy(dataPos() + tipOffset - leftCount, comps + 0, sizeof(TComponent) * leftCount);
-
         size += rightCount;
     }
 

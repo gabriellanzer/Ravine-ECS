@@ -1,9 +1,10 @@
 #ifndef COMPONENTSTORAGE_HPP
 #define COMPONENTSTORAGE_HPP
 
-#include <cstdlib>
 #include <map>
-#include <string>
+#include <set>
+#include <stdlib.h>
+#include <string.h>
 
 #include "ComponentGroup.hpp"
 
@@ -12,10 +13,16 @@ namespace rv
 
 template <typename TComponent> class ComponentStorage
 {
+    // Group def
     typedef ComponentGroup<TComponent> ComponentGroup;
-    typedef std::multimap<intptr_t, GroupMask> GroupsRegistry;
-    typedef std::map<GroupMask, ComponentGroup*, GroupMaskCmp> GroupMaskMap;
-    typedef typename GroupMaskMap::iterator GroupIt;
+    // Registry def
+    typedef std::set<GroupMask, GroupMaskCmp> GroupMaskSet;
+    typedef std::map<intptr_t, GroupMaskSet> GroupsRegistry;
+    typedef typename GroupsRegistry::iterator GroupsRegIt;
+    // Groups Storage def
+    typedef std::map<GroupMask, ComponentGroup*, GroupMaskCmp> GroupsMap;
+	typedef typename GroupsMap::value_type GroupMaskPair;
+    typedef typename GroupsMap::iterator GroupIt;
 
   private:
     int32_t size = 0;
@@ -27,8 +34,9 @@ template <typename TComponent> class ComponentStorage
      * @brief Organized holding of groups based on their representative mask values.
      * Aka.:
      */
-    GroupMaskMap groups;
+    GroupsMap groups;
     GroupsRegistry groupsRegistry;
+
     ComponentStorage() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
 
     ~ComponentStorage()
@@ -54,15 +62,14 @@ template <typename TComponent> class ComponentStorage
         GroupMask mask(masks, maskCount);
 
         // Get existing group
-        GroupIt it = groups.find(mask);
-        if (it != groups.end())
+        GroupIt it = groups.lower_bound(mask);
+        if (it != groups.end() && !(groups.key_comp()(mask, it->first)))
         {
             return it;
         }
 
         // Create new Group
-        ComponentGroup* group;
-        it = groups.emplace(mask, group).first;
+    	it = groups.insert(it, GroupMaskPair(mask, nullptr));
 
         // Setup
         const int32_t groupPos = std::distance(groups.begin(), it);
@@ -81,6 +88,12 @@ template <typename TComponent> class ComponentStorage
         it->second = new ComponentGroup(data, baseOffset);
 
         // TODO: Compute all combinations of masks and perform group registration
+        // int32_t combCount;
+        // intptr_t* combintations = getMaskCombinations(masks, maskCount, combCount);
+        // for (int32_t i = 0; i < combCount; i++)
+        // {
+        // 	groupsRegistry.find();
+        // }
 
         return it;
     }
