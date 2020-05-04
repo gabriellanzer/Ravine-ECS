@@ -1,5 +1,5 @@
-#ifndef CYCLIC_ARRAY_HPP
-#define CYCLIC_ARRAY_HPP
+#ifndef COMPONENTS_GROUP_HPP
+#define COMPONENTS_GROUP_HPP
 
 #include <cstdlib>
 #include <string>
@@ -10,7 +10,7 @@ namespace rv
 {
 
     // TODO: Turn this into a struct
-    template <typename TComponent> struct ComponentGroup
+    template <typename TComponent> struct ComponentsGroup
     {
         TComponent* const& data;
         int32_t baseOffset = 0;
@@ -21,7 +21,7 @@ namespace rv
         // Usefull shortcut for this operation
         inline TComponent* dataPos() { return data + baseOffset; }
 
-        ComponentGroup(TComponent* const& storageData, const int32_t storageOffset)
+        ComponentsGroup(TComponent* const& storageData, const int32_t storageOffset)
             : data(storageData), baseOffset(storageOffset)
         {
         }
@@ -137,7 +137,7 @@ namespace rv
             tipOffset += signMask(tipOffset) * size;       // Wrap around
 
             // Should Increase base ptr
-            baseOffset += toCopy;
+            baseOffset += count;
         }
 
         // Should move base ptr, changes tipOffset, size is maintained
@@ -212,13 +212,6 @@ namespace rv
      */
     struct GroupMask
     {
-        GroupMask(const intptr_t* masks, const int32_t count) : typePtr(0), typesCount(count)
-        {
-            for (size_t i = 0; i < typesCount; i++)
-            {
-                typePtr += masks[i];
-            }
-        }
         /**
          * @brief Hash of all pointer types this mask represents.
          */
@@ -227,6 +220,14 @@ namespace rv
          * @brief Amount of types this mask represents.
          */
         int32_t typesCount;
+
+        GroupMask(const intptr_t* masks, const int32_t count) : typePtr(0), typesCount(count)
+        {
+            for (size_t i = 0; i < typesCount; i++)
+            {
+                typePtr += masks[i];
+            }
+        }
     };
 
     /**

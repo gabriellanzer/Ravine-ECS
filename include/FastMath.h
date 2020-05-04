@@ -6,7 +6,8 @@ namespace rv
 {
 
     /**
-     * @brief Returns the bit mask for any int32_t value
+     * @brief Returns the bit mask for any int32_t value.
+     * Negative values return 1, positive ones return 0.
      *
      * @param val Value whose mask will be returned
      * @return constexpr int32_t Mask for the sign value.

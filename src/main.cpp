@@ -18,6 +18,8 @@ int main(int argc, char** argv)
     const char* components = "TestComps";
     storage.addComponent(masks, 2, components, 4);
     storage.addComponent(masks, 3, components, 9);
+    intptr_t mask = 1;
+    storage.getComponentIterator(mask);
 
     system("pause");
     return 0;

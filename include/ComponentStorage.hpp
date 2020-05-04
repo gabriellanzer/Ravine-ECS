@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ComponentGroup.hpp"
+#include "ComponentsGroup.hpp"
+#include "ComponentsIterator.hpp"
 
 namespace rv
 {
@@ -14,14 +15,14 @@ namespace rv
     template <typename TComponent> class ComponentStorage
     {
         // Group def
-        typedef ComponentGroup<TComponent> ComponentGroup;
+        typedef ComponentsGroup<TComponent> ComponentsGroup;
         // Registry def
         typedef std::set<GroupMask, GroupMaskCmp> GroupMaskSet;
         typedef std::map<intptr_t, GroupMaskSet> GroupsRegistry;
         typedef typename GroupsRegistry::value_type GroupRegPair;
         typedef typename GroupsRegistry::iterator GroupsRegIt;
         // Groups Storage def
-        typedef std::map<GroupMask, ComponentGroup*, GroupMaskCmp> GroupsMap;
+        typedef std::map<GroupMask, ComponentsGroup*, GroupMaskCmp> GroupsMap;
         typedef typename GroupsMap::value_type GroupMaskPair;
         typedef typename GroupsMap::iterator GroupIt;
 
@@ -59,6 +60,33 @@ namespace rv
             capacity = grow;
         }
 
+        ComponentsIterator<TComponent>* getComponentIterator(const intptr_t mask)
+        {
+            // Check if registry entry exists
+            GroupsRegIt regIt = groupsRegistry.find(mask);
+            if (regIt == groupsRegistry.end())
+            {
+                return nullptr;
+            }
+
+            // Create Iterator
+            const int32_t groupCount = regIt->second.size();
+            ComponentsGroup** groupsWithMask = new ComponentsGroup*[groupCount];
+            int32_t i = 0;
+            for (const GroupMask& mask : regIt->second)
+            {
+                // Perform Groups Lookup
+                groupsWithMask[i] = groups[mask];
+                ++i;
+            }
+            ComponentsIterator<TComponent>* it = new ComponentsIterator<TComponent>(groupsWithMask, groupCount, data);
+
+            // Safe to perform cleanup now
+            delete[] groupsWithMask;
+
+            return it;
+        }
+
         GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
         {
             // Compute Group Mask
@@ -71,20 +99,18 @@ namespace rv
                 return it;
             }
 
-            // Create new Group
+            // Creates new Group
             it = groups.insert(it, GroupMaskPair(mask, nullptr));
-
             // Proper Initialization
             int32_t baseOffset = 0;
             if (it != groups.begin())
             {
                 GroupIt lastGroupIt = it;
                 --lastGroupIt;
-                ComponentGroup* lastGroup = lastGroupIt->second;
+                ComponentsGroup* lastGroup = lastGroupIt->second;
                 baseOffset = lastGroup->baseOffset + lastGroup->size;
             }
-            it->second = new ComponentGroup(data, baseOffset);
-
+            it->second = new ComponentsGroup(data, baseOffset);
             // Insert Group Mask in the registry
             int32_t combCount;
             intptr_t* combs = getMaskCombinations(masks, maskCount, combCount);
@@ -117,7 +143,7 @@ namespace rv
             }
 
             // Hold group reference
-            ComponentGroup* group = groupIt->second;
+            ComponentsGroup* group = groupIt->second;
 
             // Make space for the new components in the group
             group->shiftClockwise(count);
