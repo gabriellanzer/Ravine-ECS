@@ -87,43 +87,6 @@ namespace rv
             return it;
         }
 
-        GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
-        {
-            // Compute Group Mask
-            GroupMask mask(masks, maskCount);
-
-            // Get existing group
-            GroupIt it = groups.lower_bound(mask);
-            if (it != groups.end() && !(groups.key_comp()(mask, it->first)))
-            {
-                return it;
-            }
-
-            // Creates new Group
-            it = groups.insert(it, GroupMaskPair(mask, nullptr));
-            // Proper Initialization
-            int32_t baseOffset = 0;
-            if (it != groups.begin())
-            {
-                GroupIt lastGroupIt = it;
-                --lastGroupIt;
-                ComponentsGroup* lastGroup = lastGroupIt->second;
-                baseOffset = lastGroup->baseOffset + lastGroup->size;
-            }
-            it->second = new ComponentsGroup(data, baseOffset);
-            // Insert Group Mask in the registry
-            int32_t combCount;
-            intptr_t* combs = getMaskCombinations(masks, maskCount, combCount);
-            for (int32_t i = 0; i < combCount; i++)
-            {
-                const intptr_t comb = combs[i];
-                GroupsRegIt regEntryIt = getRegistryEntryIt(comb);
-                regEntryIt->second.insert(mask);
-            }
-
-            return it;
-        }
-
         // TODO: Process many groups, each with different masks
         void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
         {
@@ -155,6 +118,58 @@ namespace rv
             size += count;
         }
 
+        GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
+        {
+            // Compute Group Mask
+            GroupMask mask(masks, maskCount);
+
+            // Get existing group
+            GroupIt it = groups.lower_bound(mask);
+            if (it != groups.end() && !(groups.key_comp()(mask, it->first)))
+            {
+                return it;
+            }
+
+            // Creates new Group
+            it = groups.insert(it, GroupMaskPair(mask, nullptr));
+            // Proper Initialization
+            int32_t baseOffset = 0;
+            if (it != groups.begin())
+            {
+                GroupIt lastGroupIt = it;
+                --lastGroupIt;
+                ComponentsGroup* lastGroup = lastGroupIt->second;
+                baseOffset = lastGroup->baseOffset + lastGroup->size;
+            }
+            it->second = new ComponentsGroup(data, baseOffset);
+
+            // Skip current ComponentType ptr
+            const intptr_t curType = (intptr_t)getInstance();
+            intptr_t* selComb = new intptr_t[maskCount - 1];
+            for (int32_t i = 0, j = 0; i < maskCount - 1; i++, j++)
+            {
+                if (masks[j] == curType)
+                {
+                    j++;
+                }
+                selComb[i] = masks[j];
+            }
+            // Insert Group Mask in the registry
+            GroupsRegIt regEntryIt = getRegistryEntryIt(curType);
+            regEntryIt->second.insert(mask);
+            // Insert Group Mask for all combinations
+            int32_t combCount;
+            intptr_t* combs = getMaskCombinations(selComb, maskCount - 1, combCount);
+            for (int32_t i = 0; i < combCount; i++)
+            {
+                const intptr_t comb = curType + combs[i];
+                regEntryIt = getRegistryEntryIt(comb);
+                regEntryIt->second.insert(mask);
+            }
+            delete[] selComb;
+            return it;
+        }
+
         inline GroupsRegIt getRegistryEntryIt(const intptr_t mask)
         {
             // Look for registry entry
@@ -171,6 +186,12 @@ namespace rv
 
             // Returns entry
             return regIt;
+        }
+
+        static ComponentStorage<TComponent> const* getInstance()
+        {
+            static ComponentStorage<TComponent>* storage = new ComponentStorage<TComponent>();
+            return storage;
         }
     };
 

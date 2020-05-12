@@ -19,12 +19,14 @@ namespace rv
         int32_t* offsets;
         const int32_t groupCount;
 
-        // Current Iterator Position (in fields)
-        const int32_t it;
+        // Current Position Iterator
+        int32_t it;
+        // Current Group Iterator
+        int32_t groupIt;
 
         ComponentsIterator(ComponentsGroup<TComponent>** groups, const int32_t groupCount,
                            TComponent const* storageData)
-            : data(storageData), groupCount(groupCount), it(0)
+            : data(storageData), groupCount(groupCount), it(0), groupIt(0)
         {
             sizes = static_cast<int32_t*>(malloc(groupCount));
             offsets = static_cast<int32_t*>(malloc(groupCount));
@@ -43,8 +45,30 @@ namespace rv
             data = nullptr;
             it = -1;
         }
-        inline TComponent& operator[](int32_t id) { return data[id]; }
-        inline const TComponent& operator[](int32_t id) const { return data[id]; }
+        inline TComponent& operator[](int32_t id)
+        { 
+            groupIt = 0;
+            for (int32_t i = 0; i < groupCount; i++)
+            {
+                const int32_t size = sizes[groupIt];
+                int locMask = 1 - signMask(size - id);
+                groupIt += locMask;
+                id -= size * locMask;
+            }
+            return data[id];
+        }
+        inline const TComponent& operator[](int32_t id) const
+        { 
+            groupIt = 0;
+            for (int32_t i = 0; i < groupCount; i++)
+            {
+                const int32_t size = sizes[groupIt];
+                int locMask = 1 - signMask(size - id);
+                groupIt += locMask;
+                id -= size * locMask;
+            }
+            return data[id];
+         }
     };
 } // namespace rv
 
