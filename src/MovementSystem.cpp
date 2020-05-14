@@ -5,7 +5,11 @@ void MovementSystem::update(const double deltaTime, const size_t size, Component
 {
     for (size_t i = 0; i < size; i++)
     {
-        pos[i] += vel[i] * deltaTime;
+        const VelocityComponent& v = vel[i];
+        PositionComponent& p = pos[i];
+        p.x += v.Vx * deltaTime;
+        p.y += v.Vy * deltaTime;
+        p.z += v.Vz * deltaTime;
         // std::cout << "pos " << pos[i] << "; vel " << vel[i] << std::endl;
     }
     // system("cls");

@@ -12,7 +12,7 @@ namespace rv
      * @param val Value whose mask will be returned
      * @return constexpr int32_t Mask for the sign value.
      */
-    constexpr int32_t signMask(const int32_t val) { return (static_cast<uint32_t>(val) >> 31 & 0x1); }
+    constexpr int32_t signMask(const int32_t val) { return (static_cast<uint32_t>(val) >> 31); }
 
     /**
      * @brief Return the minimum value between 'a' and 'b'

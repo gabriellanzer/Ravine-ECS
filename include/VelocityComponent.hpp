@@ -12,7 +12,7 @@ struct VelocityComponent
 
     VelocityComponent(float Vx, float Vy, float Vz) : Vx(Vx), Vy(Vy), Vz(Vz) {}
 
-    VelocityComponent& operator*=(const double& rhs)
+    constexpr VelocityComponent& operator*=(const double& rhs)
     {
 
         Vx *= rhs;
@@ -21,7 +21,7 @@ struct VelocityComponent
         return *this;
     }
 
-    VelocityComponent operator*(const double& rhs)
+    inline VelocityComponent operator*(const double& rhs)
     {
         VelocityComponent comp;
         comp.Vx = Vx * rhs;
@@ -30,7 +30,7 @@ struct VelocityComponent
         return comp;
     }
 
-    VelocityComponent& operator+=(const VelocityComponent& rhs)
+    constexpr VelocityComponent& operator+=(const VelocityComponent& rhs)
     {
 
         Vx += rhs.Vx;

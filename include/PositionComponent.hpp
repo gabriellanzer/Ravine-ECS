@@ -11,9 +11,9 @@ struct PositionComponent
 
     PositionComponent() { x = y = z = 1; }
 
-    PositionComponent(float x, float y, float z) : x(x), y(y), z(z) {}
+    constexpr PositionComponent(float x, float y, float z) : x(x), y(y), z(z) {}
 
-    PositionComponent& operator*=(const double& rhs)
+    constexpr PositionComponent& operator*=(const double& rhs)
     {
 
         x *= rhs;
@@ -22,7 +22,7 @@ struct PositionComponent
         return *this;
     }
 
-    PositionComponent operator*(const double& rhs)
+    inline PositionComponent operator*(const double& rhs)
     {
         PositionComponent comp;
         comp.x = x * rhs;
@@ -31,7 +31,7 @@ struct PositionComponent
         return comp;
     }
 
-    PositionComponent& operator+=(const PositionComponent& rhs)
+    constexpr PositionComponent& operator+=(const PositionComponent& rhs)
     {
 
         x += rhs.x;
@@ -40,7 +40,7 @@ struct PositionComponent
         return *this;
     }
 
-    PositionComponent& operator+=(const VelocityComponent& rhs)
+    constexpr PositionComponent& operator+=(const VelocityComponent& rhs)
     {
 
         x += rhs.Vx;

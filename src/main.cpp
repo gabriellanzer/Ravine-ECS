@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 
     ISystem* movementSystem = new MovementSystem();
     ISystem* gravitySystem = new GravitySystem();
-    ISystem* boundingSystem = new BoundingSystem();
+    // ISystem* boundingSystem = new BoundingSystem();
     for (size_t i = 0; i < 20000000; i++)
     {
         ComponentsManager::createComponents(PositionComponent(i * 0.0001f, 0, 0), VelocityComponent(0, 1, 0));
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
         
         double deltaTime = 0.3;
         gravitySystem->update(deltaTime);
-        boundingSystem->update(deltaTime);
+        // boundingSystem->update(deltaTime);
         movementSystem->update(deltaTime);
 
         auto end = std::chrono::system_clock::now();

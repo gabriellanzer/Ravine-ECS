@@ -47,44 +47,32 @@ namespace rv
             count = -1;
         }
 
-        inline TComponent& operator[](const int32_t id)
+        constexpr TComponent& operator[](const int32_t id)
         {
             // Search for the right group
-            for (int32_t i = 0; i < groupCount; i++)
+            int32_t gCount = groupCount;
+            for (int32_t i = 0; i < gCount; i++)
             {
-                const int32_t it = groupIt * 3;
-                const int32_t iniPos = groupInfo[it + 0];
-                const int32_t endPos = groupInfo[it + 1];
-                const int lMask = -signMask(id - iniPos);
-                const int rMask = signMask(endPos - id);
-                groupIt += lMask + rMask;
+                int lMask = signMask(id - groupInfo[groupIt + 0]);
+                int rMask = signMask(groupInfo[groupIt + 1] - id);
+                groupIt += (-lMask + rMask) * 3;
+                gCount *= lMask | rMask;
             }
-            // Calculate real position
-            const int32_t it = groupIt * 3;
-            const int32_t iniPos = groupInfo[it + 0];
-            const int32_t offset = groupInfo[it + 2];
-            const int32_t realPos = offset + (id - iniPos);
-            return data[realPos];
+            return data[groupInfo[groupIt + 2] + (id - groupInfo[groupIt + 0])];
         }
 
         inline const TComponent& operator[](const int32_t id) const
         {
             // Search for the right group
-            for (int32_t i = 0; i < groupCount; i++)
+            int32_t gCount = groupCount;
+            for (int32_t i = 0; i < gCount; i++)
             {
-                const int32_t it = groupIt * 3;
-                const int32_t iniPos = groupInfo[it + 0];
-                const int32_t endPos = groupInfo[it + 1];
-                const int lMask = -signMask(id - iniPos);
-                const int rMask = signMask(endPos - id);
-                groupIt += lMask + rMask;
+                int lMask = signMask(id - groupInfo[groupIt + 0]);
+                int rMask = signMask(groupInfo[groupIt + 1] - id);
+                groupIt += (-lMask + rMask) * 3;
+                gCount *= lMask | rMask;
             }
-            // Calculate real position
-            const int32_t it = groupIt * 3;
-            const int32_t iniPos = groupInfo[it + 0];
-            const int32_t offset = groupInfo[it + 2];
-            const int32_t realPos = offset + (id - iniPos);
-            return data[realPos];
+            return data[groupInfo[groupIt + 2] + (id - groupInfo[groupIt + 0])];
         }
     };
 } // namespace rv
