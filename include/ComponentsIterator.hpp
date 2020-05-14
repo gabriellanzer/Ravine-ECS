@@ -17,7 +17,7 @@ namespace rv
 
         // Iterator Group Fields
         int32_t groupInfo[90 /*LIMIT OF 30 GROUPS*/];
-        const int32_t groupCount;
+        int32_t groupCount;
 
       public:
         // Current Group Iterator
