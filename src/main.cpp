@@ -23,9 +23,9 @@ int main(int argc, char** argv)
     storage.addComponent(masks, 2, components, 4);
     storage.addComponent(masks, 3, components, 9);
     storage.addComponent(masks, 1, components, 3);
-    intptr_t mask = 1;
-    storage.getComponentIterator(mask);
-
+    intptr_t mask = masks[0];
+    ComponentsIterator<char> test = storage.getComponentIterator(mask);
+    
     system("pause");
     return 0;
 }

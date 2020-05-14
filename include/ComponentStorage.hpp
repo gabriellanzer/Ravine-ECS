@@ -60,13 +60,13 @@ namespace rv
             capacity = grow;
         }
 
-        ComponentsIterator<TComponent>* getComponentIterator(const intptr_t mask)
+        ComponentsIterator<TComponent> getComponentIterator(const intptr_t mask)
         {
             // Check if registry entry exists
             GroupsRegIt regIt = groupsRegistry.find(mask);
             if (regIt == groupsRegistry.end())
             {
-                return nullptr;
+                return ComponentsIterator<char>();
             }
 
             // Create Iterator
@@ -79,7 +79,7 @@ namespace rv
                 groupsWithMask[i] = groups[mask];
                 ++i;
             }
-            ComponentsIterator<TComponent>* it = new ComponentsIterator<TComponent>(groupsWithMask, groupCount, data);
+            ComponentsIterator<TComponent> it(groupsWithMask, groupCount, data);
 
             // Safe to perform cleanup now
             delete[] groupsWithMask;
