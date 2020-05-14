@@ -25,6 +25,12 @@ int main(int argc, char** argv)
     storage.addComponent(masks, 1, components, 3);
     intptr_t mask = masks[0];
     ComponentsIterator<char> test = storage.getComponentIterator(mask);
+    for (int32_t i = 0; i < test.count; i++)
+    {
+        char comp = test[i];
+        int32_t group = test.groupIt;
+        fprintf(stdout, "Group %i - Comp: %c\n", group, comp);
+    }
     
     system("pause");
     return 0;

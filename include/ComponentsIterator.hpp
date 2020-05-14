@@ -19,10 +19,9 @@ namespace rv
         int32_t groupInfo[90 /*LIMIT OF 30 GROUPS*/];
         const int32_t groupCount;
 
+      public:
         // Current Group Iterator
         int32_t groupIt;
-
-      public:
         // Components Count
         int32_t count;
 
