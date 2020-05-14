@@ -15,13 +15,23 @@ int main(int argc, char** argv)
 
     ComponentStorage<char> storage;
     intptr_t masks[] = {
-        (intptr_t)0,
-        (intptr_t)1,
-        (intptr_t)2
-    };
+        (intptr_t)ComponentStorage<char>::getInstance(),
+        (intptr_t)ComponentStorage<float>::getInstance(),
+        (intptr_t)ComponentStorage<int>::getInstance()
+        };
     const char* components = "TestComps";
-    storage.addComponent(masks, 3, components, sizeof(components));
-
+    storage.addComponent(masks, 2, components, 4);
+    storage.addComponent(masks, 3, components, 9);
+    storage.addComponent(masks, 1, components, 3);
+    intptr_t mask = masks[0];
+    ComponentsIterator<char> test = storage.getComponentIterator(mask);
+    for (int32_t i = 0; i < test.count; i++)
+    {
+        char comp = test[i];
+        int32_t group = test.groupIt;
+        fprintf(stdout, "Group %i - Comp: %c\n", group, comp);
+    }
+    
     system("pause");
     return 0;
 }

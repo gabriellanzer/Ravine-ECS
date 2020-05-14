@@ -50,7 +50,8 @@
     "xfacet": "cpp",
     "xlocinfo": "cpp",
     "xtr1common": "cpp",
-    "xtree": "cpp"
+    "xtree": "cpp",
+    "set": "cpp"
   },
   "cmake.configureOnOpen": true,
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/"
