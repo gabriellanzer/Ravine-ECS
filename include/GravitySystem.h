@@ -9,7 +9,7 @@ using namespace rv;
 class GravitySystem : public BaseSystem<VelocityComponent>
 {
     // Inherited via BaseSystem
-    void update(double deltaTime, size_t size, VelocityComponent* vel) override;
+    void update(double deltaTime, size_t size, ComponentsIterator<VelocityComponent> vel) override;
 };
 
 #endif

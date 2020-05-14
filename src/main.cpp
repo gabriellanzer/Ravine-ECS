@@ -1,7 +1,9 @@
 #include <chrono>
 #include <iostream>
 
-#include "ComponentStorage.hpp"
+#include "MovementSystem.h"
+#include "GravitySystem.h"
+#include "BoundingSystem.hpp"
 
 using std::cout;
 using std::endl;
@@ -13,23 +15,17 @@ int main(int argc, char** argv)
     cout.setf(std::ios::fixed, std::ios::floatfield);
     cout.precision(9);
 
-    ComponentStorage<char> storage;
-    intptr_t masks[] = {
-        (intptr_t)ComponentStorage<char>::getInstance(),
-        (intptr_t)ComponentStorage<float>::getInstance(),
-        (intptr_t)ComponentStorage<int>::getInstance()
-        };
-    const char* components = "TestComps";
-    storage.addComponent(masks, 2, components, 4);
-    storage.addComponent(masks, 3, components, 9);
-    storage.addComponent(masks, 1, components, 3);
-    intptr_t mask = masks[0];
-    ComponentsIterator<char> test = storage.getComponentIterator(mask);
-    for (int32_t i = 0; i < test.count; i++)
+    ISystem* movementSystem = new MovementSystem();
+    ISystem* gravitySystem = new GravitySystem();
+    ISystem* boundingSystem = new BoundingSystem();
+    ComponentsManager::createComponents(PositionComponent(0, 0, 0), VelocityComponent(0, 5, 0));
+
+    while(1)
     {
-        char comp = test[i];
-        int32_t group = test.groupIt;
-        fprintf(stdout, "Group %i - Comp: %c\n", group, comp);
+        double deltaTime = 0.3;
+        gravitySystem->update(deltaTime);
+        boundingSystem->update(deltaTime);
+        movementSystem->update(deltaTime);
     }
     
     system("pause");

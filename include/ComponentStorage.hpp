@@ -66,7 +66,7 @@ namespace rv
             GroupsRegIt regIt = groupsRegistry.find(mask);
             if (regIt == groupsRegistry.end())
             {
-                return ComponentsIterator<char>();
+                return ComponentsIterator<TComponent>();
             }
 
             // Create Iterator
@@ -188,7 +188,7 @@ namespace rv
             return regIt;
         }
 
-        static ComponentStorage<TComponent> const* getInstance()
+        static ComponentStorage<TComponent>* getInstance()
         {
             static ComponentStorage<TComponent>* storage = new ComponentStorage<TComponent>();
             return storage;

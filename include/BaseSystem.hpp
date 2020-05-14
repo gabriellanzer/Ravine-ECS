@@ -4,10 +4,8 @@
 #include "ComponentsManager.hpp"
 #include "ISystem.h"
 #include "TemplateIndexPack.h"
-#include <tuple>
 
 using std::get;
-using std::tuple;
 
 namespace rv
 {
@@ -15,24 +13,7 @@ namespace rv
     template <class... TComponents> class BaseSystem : public ISystem
     {
       private:
-        tuple<TComponents*...> componentLists;
-
-        template <int It>
-        constexpr void getComponent(tuple<TComponents*...>& componentLists,
-                                    array<size_t, sizeof...(TComponents)> offsets)
-        {
-        }
-
-        template <int It, class TComponent, class... TArgs>
-        constexpr void getComponent(tuple<TComponents*...>& componentLists,
-                                    array<size_t, sizeof...(TComponents)> offsets)
-        {
-            // Get Component List from manager for TComponent type
-            vector<TComponent>& componentList = ComponentsManager::getArray<TComponent>();
-            get<It>(componentLists) = componentList.data() + get<It>(offsets);
-
-            getComponent<It + 1, TArgs...>(componentLists, offsets);
-        }
+        tuple<ComponentsIterator<TComponents>...> compIterators;
 
         /**
          * @brief Calls the virtual \see{update} function by unfolding their arguments with a compile-time sequence
@@ -41,12 +22,12 @@ namespace rv
          * @tparam S Type list id sequence
          * @param deltaTime Time since last update
          * @param size Amount of entities the components represent
-         * @param componentLists Lists for each component type this system runs through
+         * @param componentIt Iterator for each component type this system runs through
          */
         template <int... S>
-        constexpr void updateUnfold(double deltaTime, size_t size, tuple<TComponents*...>& componentLists, seq<S...>)
+        constexpr void updateUnfold(double deltaTime, size_t size, seq<S...>)
         {
-            update(deltaTime, size, get<S>(componentLists)...);
+            update(deltaTime, size, get<S>(compIterators)...);
         }
 
         // This function was a test using a for-loop in BaseSystem class calling a virtual update function that
@@ -64,20 +45,13 @@ namespace rv
          *
          * @param deltaTime Timespan between last and current frame (in seconds).
          */
-        void update(double deltaTime) override final
+        void update(double deltaTime) final
         {
-            // Get Updated List of components
-            auto offsets = ComponentsManager::getOffsets<TComponents...>();
-            getComponent<0, TComponents...>(componentLists, offsets);
-            size_t size = static_cast<size_t>(-1);
-            auto sizes = ComponentsManager::getSizes<TComponents...>();
-            for (size_t it : sizes)
-            {
-                if (it < size)
-                    size = it;
-            }
+            // Get Updated List of Iterators
+            compIterators = ComponentsManager::getComponentIterators<TComponents...>();
+            size_t size = get<0>(compIterators).count;
 
-            updateUnfold(deltaTime, size, componentLists, typename gens<sizeof...(TComponents)>::type());
+            updateUnfold(deltaTime, size, typename gens<sizeof...(TComponents)>::type());
         }
 
         /**
@@ -88,7 +62,7 @@ namespace rv
          * @param size Amount of entities the components represent.
          * @param components List expansion for each component type this system runs through.
          */
-        virtual void update(double deltaTime, size_t size, TComponents*... components) = 0;
+        virtual void update(double deltaTime, size_t size, ComponentsIterator<TComponents>... components) = 0;
     };
 
 } // namespace rv

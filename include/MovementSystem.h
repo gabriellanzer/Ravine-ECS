@@ -12,7 +12,7 @@ using std::endl;
 
 class MovementSystem : public BaseSystem<VelocityComponent, PositionComponent>
 {
-    void update(double deltaTime, size_t size, VelocityComponent* vel, PositionComponent* pos) override;
+    void update(double deltaTime, size_t size, ComponentsIterator<VelocityComponent> vel, ComponentsIterator<PositionComponent> pos) override;
 };
 
 #endif
