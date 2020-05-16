@@ -11,6 +11,17 @@
       "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": true
+    },
+    {
+      "name": "(Ubuntu) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/bin/Debug/ravine-ecs",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": true
     }
   ]
 }

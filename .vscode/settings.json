@@ -54,5 +54,11 @@
     "set": "cpp"
   },
   "cmake.configureOnOpen": true,
-  "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/"
+  "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/",
+  "cmake.copyCompileCommands": "${workspaceFolder}",
+  "cmake.ctestPath": "",
+  "cmake.generator": "",
+  "cmake.installPrefix": "",
+  "cmake.platform": "",
+  "cmake.toolset": ""
 }

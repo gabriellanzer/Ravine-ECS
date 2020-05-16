@@ -43,9 +43,9 @@ struct PositionComponent
     constexpr PositionComponent& operator+=(const VelocityComponent& rhs)
     {
 
-        x += rhs.Vx;
-        y += rhs.Vy;
-        z += rhs.Vz;
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
         return *this;
     }
 

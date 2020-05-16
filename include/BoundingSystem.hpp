@@ -16,7 +16,7 @@ class BoundingSystem : public BaseSystem<PositionComponent, VelocityComponent>
             if (pos[i].y < 0.0f)
             {
                 pos[i].y = 0.0f;
-                vel[i].Vy *= -1.0f;
+                vel[i].y *= -1.0f;
             }
         }
     }

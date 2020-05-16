@@ -1,9 +1,8 @@
 #include <chrono>
 #include <iostream>
 
+#include "ComflabulationSystem.hpp"
 #include "MovementSystem.h"
-#include "GravitySystem.h"
-#include "BoundingSystem.hpp"
 
 using std::cout;
 using std::endl;
@@ -15,28 +14,44 @@ int main(int argc, char** argv)
     cout.setf(std::ios::fixed, std::ios::floatfield);
     cout.precision(9);
 
+    ISystem* comflabulationSystem = new ComflabulationSystem();
     ISystem* movementSystem = new MovementSystem();
-    ISystem* gravitySystem = new GravitySystem();
-    // ISystem* boundingSystem = new BoundingSystem();
-    for (size_t i = 0; i < 20000000; i++)
+    for (size_t i = 0; i < 2'000'000; i++)
     {
-        ComponentsManager::createComponents(PositionComponent(i * 0.0001f, 0, 0), VelocityComponent(0, 1, 0));
+        if (i % 2 != 0)
+        {
+            ComponentsManager::createComponents(PositionComponent(), VelocityComponent(), ComflabulationComponent());
+        }
+        else
+        {
+            ComponentsManager::createComponents(PositionComponent(), VelocityComponent());
+        }
     }
 
-    while(1)
+    double deltaTime = 0;
+    int32_t i = 0;
+    double acc = 0;
+    while (1)
     {
         auto start = std::chrono::system_clock::now();
-        
-        double deltaTime = 0.3;
-        gravitySystem->update(deltaTime);
-        // boundingSystem->update(deltaTime);
+
         movementSystem->update(deltaTime);
+        comflabulationSystem->update(deltaTime);
 
         auto end = std::chrono::system_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-        std::cout << elapsed.count() * 0.000001 << "ms\n";
+        deltaTime = elapsed.count() * 0.000000001;
+
+        acc += deltaTime;
+        i++;
+        if (i == 50)
+        {
+            fprintf(stdout, "%f seconds\n", acc / 50.0);
+            acc = 0;
+            i = 0;
+        }
     }
-    
+
     system("pause");
     return 0;
 }

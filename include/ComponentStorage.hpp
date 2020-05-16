@@ -11,18 +11,17 @@
 
 namespace rv
 {
-
     template <typename TComponent> class ComponentStorage
     {
         // Group def
-        typedef ComponentsGroup<TComponent> ComponentsGroup;
+        using CompGroup = ComponentsGroup<TComponent>;
         // Registry def
         typedef std::set<GroupMask, GroupMaskCmp> GroupMaskSet;
         typedef std::map<intptr_t, GroupMaskSet> GroupsRegistry;
         typedef typename GroupsRegistry::value_type GroupRegPair;
         typedef typename GroupsRegistry::iterator GroupsRegIt;
         // Groups Storage def
-        typedef std::map<GroupMask, ComponentsGroup*, GroupMaskCmp> GroupsMap;
+        typedef std::map<GroupMask, CompGroup*, GroupMaskCmp> GroupsMap;
         typedef typename GroupsMap::value_type GroupMaskPair;
         typedef typename GroupsMap::iterator GroupIt;
 
@@ -71,7 +70,7 @@ namespace rv
 
             // Create Iterator
             const int32_t groupCount = regIt->second.size();
-            ComponentsGroup** groupsWithMask = new ComponentsGroup*[groupCount];
+            CompGroup** groupsWithMask = new CompGroup*[groupCount];
             int32_t i = 0;
             for (const GroupMask& mask : regIt->second)
             {
@@ -106,7 +105,7 @@ namespace rv
             }
 
             // Hold group reference
-            ComponentsGroup* group = groupIt->second;
+            CompGroup* group = groupIt->second;
 
             // Make space for the new components in the group
             group->shiftClockwise(count);
@@ -138,10 +137,10 @@ namespace rv
             {
                 GroupIt lastGroupIt = it;
                 --lastGroupIt;
-                ComponentsGroup* lastGroup = lastGroupIt->second;
+                CompGroup* lastGroup = lastGroupIt->second;
                 baseOffset = lastGroup->baseOffset + lastGroup->size;
             }
-            it->second = new ComponentsGroup(data, baseOffset);
+            it->second = new CompGroup(data, baseOffset);
 
             // Skip current ComponentType ptr
             const intptr_t curType = (intptr_t)getInstance();

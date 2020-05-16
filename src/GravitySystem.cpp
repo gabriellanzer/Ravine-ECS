@@ -4,6 +4,6 @@ void GravitySystem::update(double deltaTime, size_t size, ComponentsIterator<Vel
 {
     for (size_t i = 0; i < size; i++)
     {
-        vel[i].Vy -= 9.8 * deltaTime;
+        vel[i].y -= 9.8 * deltaTime;
     }
 }

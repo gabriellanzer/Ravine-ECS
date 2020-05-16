@@ -60,20 +60,6 @@ namespace rv
             }
             return data[groupInfo[groupIt + 2] + (id - groupInfo[groupIt + 0])];
         }
-
-        inline const TComponent& operator[](const int32_t id) const
-        {
-            // Search for the right group
-            int32_t gCount = groupCount;
-            for (int32_t i = 0; i < gCount; i++)
-            {
-                int lMask = signMask(id - groupInfo[groupIt + 0]);
-                int rMask = signMask(groupInfo[groupIt + 1] - id);
-                groupIt += (-lMask + rMask) * 3;
-                gCount *= lMask | rMask;
-            }
-            return data[groupInfo[groupIt + 2] + (id - groupInfo[groupIt + 0])];
-        }
     };
 } // namespace rv
 
