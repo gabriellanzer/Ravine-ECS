@@ -21,12 +21,12 @@ namespace rv
         // Usefull shortcut for this operation
         inline TComponent* dataPos() { return data + baseOffset; }
 
-        ComponentsGroup(TComponent* const& storageData, const int32_t storageOffset)
+        constexpr ComponentsGroup(TComponent* const& storageData, const int32_t storageOffset)
             : data(storageData), baseOffset(storageOffset)
         {
         }
 
-        void addComponent(const TComponent* comps, const uint32_t count)
+        inline void addComponent(const TComponent* comps, const uint32_t count)
         {
             const int32_t missLeft = tipOffset - count;
             const int32_t rightMask = signMask(missLeft);
@@ -48,7 +48,7 @@ namespace rv
          * @param count Size of the given component Ids list.
          * @return int32_t Amount of elements emptied to the right-side of the array.
          */
-        int32_t remComponent(const int32_t* compIds, const int32_t count)
+        inline int32_t remComponent(const int32_t* compIds, const int32_t count)
         {
             const int32_t rightSize = size - tipOffset;
             int32_t leftComprCount = 0;
@@ -128,7 +128,7 @@ namespace rv
         inline void remComponent(const int compId) { remComponent(&compId, 1); }
 
         // Should move base ptr, changes tipOffset, size is maintained
-        void rollClockwise(const int32_t count)
+        inline void rollClockwise(const int32_t count)
         {
             const int32_t toCopy = min(size, count);
             const int32_t stride = max(size, count);
@@ -141,7 +141,7 @@ namespace rv
         }
 
         // Should move base ptr, changes tipOffset, size is maintained
-        void rollCounterClockwise(const int32_t count)
+        inline void rollCounterClockwise(const int32_t count)
         {
             const int32_t dstOffset = min(baseOffset, count);
             const int32_t toCopy = min(dstOffset, size);
@@ -163,7 +163,7 @@ namespace rv
          * @param count
          * @return constexpr int32_t
          */
-        int32_t shiftClockwise(int32_t count)
+        inline int32_t shiftClockwise(int32_t count)
         {
             count = min(count, tipOffset);
             const int32_t mask = signMask(count - tipOffset);
@@ -221,7 +221,7 @@ namespace rv
          */
         int32_t typesCount;
 
-        GroupMask(const intptr_t* masks, const int32_t count) : typePtr(0), typesCount(count)
+        inline GroupMask(const intptr_t* masks, const int32_t count) : typePtr(0), typesCount(count)
         {
             for (size_t i = 0; i < typesCount; i++)
             {
@@ -235,7 +235,7 @@ namespace rv
      */
     struct GroupMaskCmp
     {
-        bool operator()(const GroupMask& a, const GroupMask& b) const
+        inline bool operator()(const GroupMask& a, const GroupMask& b) const
         {
             if (a.typesCount != b.typesCount)
             {

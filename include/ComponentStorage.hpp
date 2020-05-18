@@ -40,7 +40,7 @@ namespace rv
          */
         GroupsRegistry groupsRegistry;
 
-        ComponentStorage() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
+        constexpr ComponentStorage() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
 
         ~ComponentStorage()
         {
@@ -49,7 +49,7 @@ namespace rv
             capacity = 0;
         }
 
-        void grow(int32_t newCapacity = 0)
+        inline void grow(int32_t newCapacity = 0)
         {
             const int32_t grow = max(capacity, newCapacity) * 1.5f;
             TComponent* newData = static_cast<TComponent*>(malloc(grow * sizeof(TComponent)));
@@ -59,7 +59,7 @@ namespace rv
             capacity = grow;
         }
 
-        ComponentsIterator<TComponent> getComponentIterator(const intptr_t mask)
+        inline ComponentsIterator<TComponent> getComponentIterator(const intptr_t mask)
         {
             // Check if registry entry exists
             GroupsRegIt regIt = groupsRegistry.find(mask);
@@ -87,7 +87,7 @@ namespace rv
         }
 
         // TODO: Process many groups, each with different masks
-        void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
+        inline void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
         {
             // Check if we have enough space
             if (size + count >= capacity)
@@ -117,7 +117,7 @@ namespace rv
             size += count;
         }
 
-        GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
+        inline GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
         {
             // Compute Group Mask
             GroupMask mask(masks, maskCount);
@@ -187,7 +187,7 @@ namespace rv
             return regIt;
         }
 
-        static ComponentStorage<TComponent>* getInstance()
+        inline static ComponentStorage<TComponent>* getInstance()
         {
             static ComponentStorage<TComponent>* storage = new ComponentStorage<TComponent>();
             return storage;

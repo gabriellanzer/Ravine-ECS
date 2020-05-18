@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 
     ISystem* comflabulationSystem = new ComflabulationSystem();
     ISystem* movementSystem = new MovementSystem();
-    for (size_t i = 0; i < 2'000'000; i++)
+    for (size_t i = 0; i < 10'000'000; i++)
     {
         if (i % 2 != 0)
         {
@@ -25,6 +25,11 @@ int main(int argc, char** argv)
         else
         {
             ComponentsManager::createComponents(PositionComponent(), VelocityComponent());
+        }
+        if(i%1000 == 0)
+        {
+            float prog = (i/10'000'000.0)*100.0;
+            fprintf(stdout, "Entities Allocation (%f%%)\n", prog);
         }
     }
 
