@@ -8,8 +8,6 @@
 
 namespace rv
 {
-
-    // TODO: Turn this into a struct
     template <typename TComponent> struct ComponentsGroup
     {
         TComponent* const& data;

@@ -13,7 +13,7 @@ namespace rv
     template <class... TComponents> class BaseSystem : public ISystem
     {
       private:
-        tuple<ComponentsIterator<TComponents>...> compIterators;
+        tuple<CompIt<TComponents>...> compIterators;
 
         /**
          * @brief Calls the virtual \see{update} function by unfolding their arguments with a compile-time sequence
@@ -62,7 +62,7 @@ namespace rv
          * @param size Amount of entities the components represent.
          * @param components List expansion for each component type this system runs through.
          */
-        virtual void update(double deltaTime, size_t size, ComponentsIterator<TComponents>... components) = 0;
+        virtual void update(double deltaTime, size_t size, CompIt<TComponents>... components) = 0;
     };
 
 } // namespace rv

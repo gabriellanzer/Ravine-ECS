@@ -31,7 +31,7 @@ namespace rv
             storage->addComponent(maskArray.data(), sizeof...(TComponents), &arg, 1);
         }
 
-        template <class TComponent> static ComponentsIterator<TComponent> getComponentIterator(intptr_t mask)
+        template <class TComponent> static CompIt<TComponent> getComponentIterator(intptr_t mask)
         {
             ComponentStorage<TComponent>* storage = ComponentStorage<TComponent>::getInstance();
             return storage->getComponentIterator(mask);
@@ -45,7 +45,7 @@ namespace rv
             expander{0, ((void)(createComponent<TComponents, TComponents...>(args, masks)), 0)...};
         }
 
-        template <class... TComponents> static tuple<ComponentsIterator<TComponents>...> getComponentIterators()
+        template <class... TComponents> static tuple<CompIt<TComponents>...> getComponentIterators()
         {
             intptr_t mask = getTypeMask<TComponents...>();
             return {

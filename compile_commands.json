@@ -1,19 +1,25 @@
 [
 {
-  "directory": "D:/Projects/Personal/Ravine-ECS/build/Release",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG   /FoCMakeFiles\\ravine-ecs.dir\\src\\GravitySystem.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\GravitySystem.cpp",
+  "directory": "D:/Projects/Personal/Ravine-ECS/build/Debug",
+  "command": "C:\\PROGRA~2\\MICROS~1\\2019\\COMMUN~1\\VC\\Tools\\Llvm\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   -I -std:c++latest /FoCMakeFiles\\ravine-ecs.dir\\src\\ComflabulationSystem.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\ComflabulationSystem.cpp",
+  "file": "D:/Projects/Personal/Ravine-ECS/src/ComflabulationSystem.cpp"
+},
+
+{
+  "directory": "D:/Projects/Personal/Ravine-ECS/build/Debug",
+  "command": "C:\\PROGRA~2\\MICROS~1\\2019\\COMMUN~1\\VC\\Tools\\Llvm\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   -I -std:c++latest /FoCMakeFiles\\ravine-ecs.dir\\src\\GravitySystem.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\GravitySystem.cpp",
   "file": "D:/Projects/Personal/Ravine-ECS/src/GravitySystem.cpp"
 },
 
 {
-  "directory": "D:/Projects/Personal/Ravine-ECS/build/Release",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG   /FoCMakeFiles\\ravine-ecs.dir\\src\\MovementSystem.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\MovementSystem.cpp",
+  "directory": "D:/Projects/Personal/Ravine-ECS/build/Debug",
+  "command": "C:\\PROGRA~2\\MICROS~1\\2019\\COMMUN~1\\VC\\Tools\\Llvm\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   -I -std:c++latest /FoCMakeFiles\\ravine-ecs.dir\\src\\MovementSystem.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\MovementSystem.cpp",
   "file": "D:/Projects/Personal/Ravine-ECS/src/MovementSystem.cpp"
 },
 
 {
-  "directory": "D:/Projects/Personal/Ravine-ECS/build/Release",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG   /FoCMakeFiles\\ravine-ecs.dir\\src\\main.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\main.cpp",
+  "directory": "D:/Projects/Personal/Ravine-ECS/build/Debug",
+  "command": "C:\\PROGRA~2\\MICROS~1\\2019\\COMMUN~1\\VC\\Tools\\Llvm\\bin\\clang-cl.exe  /nologo -TP  -I..\\..\\include -I..\\..\\src  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   -I -std:c++latest /FoCMakeFiles\\ravine-ecs.dir\\src\\main.cpp.obj /FdTARGET_COMPILE_PDB -c D:\\Projects\\Personal\\Ravine-ECS\\src\\main.cpp",
   "file": "D:/Projects/Personal/Ravine-ECS/src/main.cpp"
 }
 ]

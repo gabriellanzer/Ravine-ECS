@@ -40,11 +40,11 @@ namespace rv
          */
         GroupsRegistry groupsRegistry;
 
-        constexpr ComponentStorage() : capacity(10), data(static_cast<TComponent*>(malloc(10 * sizeof(TComponent)))) {}
+        constexpr ComponentStorage() : capacity(10), data(new TComponent[10]) {}
 
         ~ComponentStorage()
         {
-            free(data);
+            delete[] data;
             groups.clear();
             capacity = 0;
         }
@@ -52,20 +52,20 @@ namespace rv
         inline void grow(int32_t newCapacity = 0)
         {
             const int32_t grow = max(capacity, newCapacity) * 1.5f;
-            TComponent* newData = static_cast<TComponent*>(malloc(grow * sizeof(TComponent)));
+            TComponent* newData = new TComponent[grow];
             memcpy(newData, data, capacity * sizeof(TComponent));
-            free(data);
+            delete[] data;
             data = newData;
             capacity = grow;
         }
 
-        inline ComponentsIterator<TComponent> getComponentIterator(const intptr_t mask)
+        inline CompIt<TComponent> getComponentIterator(const intptr_t mask)
         {
             // Check if registry entry exists
             GroupsRegIt regIt = groupsRegistry.find(mask);
             if (regIt == groupsRegistry.end())
             {
-                return ComponentsIterator<TComponent>();
+                return CompIt<TComponent>();
             }
 
             // Create Iterator
@@ -78,7 +78,7 @@ namespace rv
                 groupsWithMask[i] = groups[mask];
                 ++i;
             }
-            ComponentsIterator<TComponent> it(groupsWithMask, groupCount, data);
+            CompIt<TComponent> it(groupsWithMask, groupCount, data);
 
             // Safe to perform cleanup now
             delete[] groupsWithMask;

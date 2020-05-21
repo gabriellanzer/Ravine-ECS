@@ -1,3 +1,6 @@
+#ifndef COMFLABULATIONCOMPONENT_H
+#define COMFLABULATIONCOMPONENT_H
+
 #include <string>
 
 struct ComflabulationComponent
@@ -7,3 +10,5 @@ struct ComflabulationComponent
     bool mingy;
     std::string stringy;
 };
+
+#endif

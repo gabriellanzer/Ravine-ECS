@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 
 # Project Setup
 project(Ravine-ECS VERSION 0.1.0)
@@ -19,8 +19,10 @@ include_directories(${CMAKE_SRC_DIR})
 file(GLOB_RECURSE SRC_FILES "${CMAKE_SRC_DIR}/*.cpp")
 add_executable(ravine-ecs ${SRC_FILES})
 
-# Target for C++ STD Version 2014
-target_compile_features(ravine-ecs PRIVATE cxx_std_14)
+# Target for C++ STD Version 2017
+target_compile_features(ravine-ecs PRIVATE cxx_std_17)
+target_compile_options(ravine-ecs PRIVATE -I)
+target_link_options(ravine-ecs PRIVATE -pthread -I)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

@@ -1,16 +1,13 @@
 #include "MovementSystem.h"
 #include <iostream>
 
-void MovementSystem::update(const double deltaTime, const size_t size, ComponentsIterator<VelocityComponent> vel, ComponentsIterator<PositionComponent> pos)
+void MovementSystem::update(double deltaTime, const size_t size, CompIt<VelocityComponent> vel, CompIt<PositionComponent> pos)
 {
-    for (size_t i = 0; i < size; i++)
-    {
+    taskFlow->parallel_for(0, (int)size, 1, [deltaTime, vel, pos](int i) {
         const VelocityComponent& v = vel[i];
         PositionComponent& p = pos[i];
         p.x += v.x * deltaTime;
         p.y += v.y * deltaTime;
         p.z += v.z * deltaTime;
-        // std::cout << "pos " << pos[i] << "; vel " << vel[i] << std::endl;
-    }
-    // system("cls");
+    }, 10'000);
 }

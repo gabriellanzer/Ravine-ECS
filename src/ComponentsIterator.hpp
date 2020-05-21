@@ -9,11 +9,11 @@ using std::set;
 
 namespace rv
 {
-    template <typename TComponent> struct ComponentsIterator
+    template <typename TComp> struct CompIt
     {
       private:
         // Storage data pointer
-        TComponent* data;
+        TComp* data;
 
         // Iterator Group Fields
         int32_t groupInfo[90 /*LIMIT OF 30 GROUPS*/];
@@ -25,13 +25,14 @@ namespace rv
         // Components Count
         int32_t count;
 
-        constexpr ComponentsIterator() : data(nullptr), groupCount(0), groupIt(0), count(0) {}
-        ComponentsIterator(ComponentsGroup<TComponent>** groups, const int32_t groupCount, TComponent* storageData)
+        constexpr CompIt() : data(nullptr), groupCount(0), groupIt(0), count(0) {}
+
+        inline CompIt(ComponentsGroup<TComp>** groups, const int32_t groupCount, TComp* storageData)
             : data(storageData), groupCount(groupCount), groupIt(0), count(0)
         {
             for (int32_t i = 0; i < groupCount; i++)
             {
-                ComponentsGroup<TComponent>* group = groups[i];
+                ComponentsGroup<TComp>* group = groups[i];
                 const int32_t offset = group->baseOffset;
                 const int32_t size = group->size;
                 groupInfo[i * 3 + 0] = count; // Initial Local Pos
@@ -40,16 +41,31 @@ namespace rv
                 groupInfo[i * 3 + 2] = offset;    // Initial Real Pos
             }
         }
-        ~ComponentsIterator()
+        ~CompIt()
         {
             data = nullptr;
             groupIt = -1;
             count = -1;
         }
 
-        constexpr TComponent& operator[](const int32_t id)
+        constexpr TComp& operator[](const int32_t id)
         {
             // Search for the right group
+            int32_t gCount = groupCount;
+            for (int32_t i = 0; i < gCount; i++)
+            {
+                int lMask = signMask(id - groupInfo[groupIt + 0]);
+                int rMask = signMask(groupInfo[groupIt + 1] - id);
+                groupIt += (-lMask + rMask) * 3;
+                gCount *= lMask | rMask;
+            }
+            return data[groupInfo[groupIt + 2] + (id - groupInfo[groupIt + 0])];
+        }
+
+        constexpr TComp& operator[](const int32_t id) const
+        {
+            // Search for the right group
+            int32_t groupIt = 0;
             int32_t gCount = groupCount;
             for (int32_t i = 0; i < gCount; i++)
             {

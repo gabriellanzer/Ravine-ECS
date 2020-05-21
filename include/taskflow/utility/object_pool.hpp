@@ -18,6 +18,7 @@
 #include <vector>
 #include <cassert>
 #include <cstddef>
+#include <algorithm>
 
 namespace tf {
 
