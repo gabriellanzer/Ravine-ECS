@@ -4,5 +4,6 @@
 #include "PositionComponent.h"
 
 typedef PositionComponent VelocityComponent;
+typedef PositionComponent OtherComponent;
 
 #endif

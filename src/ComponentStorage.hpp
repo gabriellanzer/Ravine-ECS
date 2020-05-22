@@ -28,9 +28,9 @@ namespace rv
       private:
         int32_t size = 0;
         int32_t capacity = 0;
+      public:
         TComponent* data;
 
-      public:
         /**
          * @brief Organized storage of groups based on their representative mask values.
          */
@@ -40,11 +40,11 @@ namespace rv
          */
         GroupsRegistry groupsRegistry;
 
-        constexpr ComponentStorage() : capacity(10), data(new TComponent[10]) {}
+        constexpr ComponentStorage() : capacity(10), data((TComponent*)malloc(10 * sizeof(TComponent))) {}
 
         ~ComponentStorage()
         {
-            delete[] data;
+            malloc(data);
             groups.clear();
             capacity = 0;
         }
@@ -52,20 +52,20 @@ namespace rv
         inline void grow(int32_t newCapacity = 0)
         {
             const int32_t grow = max(capacity, newCapacity) * 1.5f;
-            TComponent* newData = new TComponent[grow];
+            TComponent* newData = (TComponent*)malloc(grow * sizeof(TComponent));
             memcpy(newData, data, capacity * sizeof(TComponent));
-            delete[] data;
+            free(data);
             data = newData;
             capacity = grow;
         }
 
-        inline CompIt<TComponent> getComponentIterator(const intptr_t mask)
+        inline CompGroupIt<TComponent> getComponentIterator(const intptr_t mask)
         {
             // Check if registry entry exists
             GroupsRegIt regIt = groupsRegistry.find(mask);
             if (regIt == groupsRegistry.end())
             {
-                return CompIt<TComponent>();
+                return CompGroupIt<TComponent>();
             }
 
             // Create Iterator
@@ -78,7 +78,7 @@ namespace rv
                 groupsWithMask[i] = groups[mask];
                 ++i;
             }
-            CompIt<TComponent> it(groupsWithMask, groupCount, data);
+            CompGroupIt<TComponent> it(groupsWithMask, groupCount, data);
 
             // Safe to perform cleanup now
             delete[] groupsWithMask;

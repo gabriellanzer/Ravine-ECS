@@ -40,6 +40,22 @@ namespace rv
         return a * (1 - mask) + b * mask;
     }
 
+    /**
+     * @brief Returns the highest power of two just above the given number.
+     * 
+     * @param x 
+     * @return uint32_t 
+     */
+    inline uint32_t highestPowerOfTwoIn(uint32_t x)
+    {
+        x |= x >> 1;
+        x |= x >> 2;
+        x |= x >> 4;
+        x |= x >> 8;
+        x |= x >> 16;
+        return x ^ (x >> 1);
+    }
+
     inline intptr_t* getMaskCombinations(const intptr_t* seedMasks, const int32_t maskCount, int32_t& combCount)
     {
         // Calculate number of possible combinations

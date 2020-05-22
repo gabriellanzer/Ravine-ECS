@@ -21,8 +21,8 @@ add_executable(ravine-ecs ${SRC_FILES})
 
 # Target for C++ STD Version 2017
 target_compile_features(ravine-ecs PRIVATE cxx_std_17)
-target_compile_options(ravine-ecs PRIVATE -I)
-target_link_options(ravine-ecs PRIVATE -pthread -I)
+target_compile_options(ravine-ecs PRIVATE -I -pthread)
+target_link_options(ravine-ecs PRIVATE)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

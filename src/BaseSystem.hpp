@@ -13,7 +13,7 @@ namespace rv
     template <class... TComponents> class BaseSystem : public ISystem
     {
       private:
-        tuple<CompIt<TComponents>...> compIterators;
+        tuple<CompGroupIt<TComponents>...> compIterators;
 
         /**
          * @brief Calls the virtual \see{update} function by unfolding their arguments with a compile-time sequence
@@ -21,13 +21,16 @@ namespace rv
          *
          * @tparam S Type list id sequence
          * @param deltaTime Time since last update
-         * @param size Amount of entities the components represent
          * @param componentIt Iterator for each component type this system runs through
          */
-        template <int... S>
-        constexpr void updateUnfold(double deltaTime, size_t size, seq<S...>)
+        template <int... S> constexpr void updateUnfold(double deltaTime, seq<S...>)
         {
-            update(deltaTime, size, get<S>(compIterators)...);
+            uint8_t groupCount = get<0>(compIterators).count;
+            for (uint8_t i = 0; i < groupCount; i++)
+            {
+                int32_t groupSize = get<0>(compIterators).sizes[i];
+                update(deltaTime, groupSize, get<S>(compIterators).offsets[i]...);
+            }
         }
 
         // This function was a test using a for-loop in BaseSystem class calling a virtual update function that
@@ -49,9 +52,7 @@ namespace rv
         {
             // Get Updated List of Iterators
             compIterators = ComponentsManager::getComponentIterators<TComponents...>();
-            size_t size = get<0>(compIterators).count;
-
-            updateUnfold(deltaTime, size, typename gens<sizeof...(TComponents)>::type());
+            updateUnfold(deltaTime, typename gens<sizeof...(TComponents)>::type());
         }
 
         /**
@@ -62,7 +63,7 @@ namespace rv
          * @param size Amount of entities the components represent.
          * @param components List expansion for each component type this system runs through.
          */
-        virtual void update(double deltaTime, size_t size, CompIt<TComponents>... components) = 0;
+        virtual void update(double deltaTime, size_t size, TComponents* const... components) = 0;
     };
 
 } // namespace rv

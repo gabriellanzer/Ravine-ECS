@@ -13,18 +13,8 @@ using std::endl;
 
 class MovementSystem : public BaseSystem<VelocityComponent, PositionComponent>
 {
-  private:
-    tf::Taskflow* taskFlow;
-    double deltaTime;
-    CompIt<VelocityComponent> velIt;
-    CompIt<PositionComponent> posIt;
-
   public:
-    MovementSystem(tf::Taskflow* flow) : taskFlow(flow){};
-
-    void update(double deltaTime, size_t size, CompIt<VelocityComponent> vel, CompIt<PositionComponent> pos) override;
-
-    void step(int i);
+    void update(double deltaTime, size_t size, VelocityComponent* vel, PositionComponent* pos) override;
 };
 
 #endif

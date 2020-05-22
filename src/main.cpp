@@ -4,7 +4,6 @@
 #include "taskflow/core/taskflow.hpp"
 #include "taskflow/taskflow.hpp"
 
-#include "ComflabulationSystem.h"
 #include "MovementSystem.h"
 
 using std::cout;
@@ -18,55 +17,46 @@ int main(int argc, char** argv)
     cout.setf(std::ios::fixed, std::ios::floatfield);
     cout.precision(9);
 
-    Executor executor;
-    Taskflow* taskflow = new Taskflow();
-
-    //ISystem* comflabulationSystem = new ComflabulationSystem(taskflow);
-    ISystem* movementSystem = new MovementSystem(taskflow);
-    for (size_t i = 0; i < 10'000'000; i++)
+    size_t entityCount = 2'000'000;
+    for (size_t i = 0; i < entityCount; i++)
     {
-        // if (i >= 5'000'000)
-        // {
-        //     ComponentsManager::createComponents(PositionComponent(), VelocityComponent(), ComflabulationComponent());
-        // }
-        // else
+        if(i < entityCount/2)
         {
             ComponentsManager::createComponents(PositionComponent(), VelocityComponent());
         }
+        else    
+        {
+            ComponentsManager::createComponents(PositionComponent(), VelocityComponent(), OtherComponent());
+        }
+        
         if (i % 1000 == 0)
         {
-            float prog = (i / 10'000'000.0) * 100.0;
+            float prog = (i / (double)entityCount) * 100.0;
             fprintf(stdout, "Entities Allocation (%f%%)\n", prog);
         }
     }
 
-    double deltaTime = 0;
-    int32_t i = 0;
-    double acc = 0;
-
-    movementSystem->update(deltaTime);
-    //comflabulationSystem->update(deltaTime);
-
-    while (1)
+    ISystem* movementSystem = new MovementSystem();
+    const size_t testCount = 1'000;
+	double acc;
+	double times[testCount];
+    for (size_t i = 0; i < testCount; i++)
     {
         auto start = std::chrono::system_clock::now();
 
-        executor.run(*taskflow).wait();
+        movementSystem->update(0.016);
 
         auto end = std::chrono::system_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        deltaTime = elapsed.count() / 1'000.0;
-
+        auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        double deltaTime = elapsed.count() / 1'000'000.0;
+	    fprintf(stdout, "It time %fms\n", deltaTime);
         acc += deltaTime;
-        i++;
-        if (i == 50)
-        {
-            fprintf(stdout, "%f seconds\n", acc / 50.0);
-            acc = 0;
-            i = 0;
-        }
     }
+	fprintf(stdout, "\n\n");
+	fprintf(stdout, "==============\n");
+	fprintf(stdout, "Test took %fms\n", acc / (double)testCount);
+	fprintf(stdout, "==============\n");
 
-    system("pause");
+    getchar();
     return 0;
 }
