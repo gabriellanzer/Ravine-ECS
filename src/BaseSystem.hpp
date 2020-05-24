@@ -14,6 +14,32 @@ namespace rv
     {
       private:
         tuple<CompGroupIt<TComponents>...> compIterators;
+        tuple<TComponents*...> chunkData;
+
+        template <int... T> struct FetchPack;
+
+        template <> struct FetchPack<>
+        {
+            static constexpr intptr_t fetchChunk(tuple<TComponents*...>& chunkData,
+                                                 tuple<CompGroupIt<TComponents>...>& compIt, int32_t groupId,
+                                                 int32_t fetchId)
+            {
+                return INT32_MAX;
+            }
+        };
+
+        template <int I, int... S> struct FetchPack<I, S...>
+        {
+            static constexpr int32_t fetchChunk(tuple<TComponents*...>& chunkData,
+                                                tuple<CompGroupIt<TComponents>...>& compIt, int32_t groupId,
+                                                int32_t fetchId)
+            {
+                int32_t lGroupSize = 0;
+                get<I>(chunkData) = get<I>(compIt).compIt[groupId].getChunk(fetchId, lGroupSize);
+                int32_t rGroupSize = FetchPack<S...>::fetchChunk(chunkData, compIt, groupId, fetchId);
+                return (lGroupSize < rGroupSize) ? lGroupSize : rGroupSize;
+            }
+        };
 
         /**
          * @brief Calls the virtual \see{update} function by unfolding their arguments with a compile-time sequence
@@ -25,22 +51,19 @@ namespace rv
          */
         template <int... S> constexpr void updateUnfold(double deltaTime, seq<S...>)
         {
-            uint8_t groupCount = get<0>(compIterators).count;
+            const uint8_t groupCount = get<0>(compIterators).count;
             for (uint8_t i = 0; i < groupCount; i++)
             {
-                int32_t groupSize = get<0>(compIterators).sizes[i];
-                update(deltaTime, groupSize, get<S>(compIterators).offsets[i]...);
+                int32_t fetchIt = 0;
+                int32_t groupSize = get<0>(compIterators).compIt[i].getSize();
+                while (fetchIt < groupSize)
+                {
+                    int32_t chunkSize = FetchPack<S...>::fetchChunk(chunkData, compIterators, i, fetchIt);
+                    update(deltaTime, chunkSize, get<S>(chunkData)...);
+                    fetchIt += chunkSize;
+                }
             }
         }
-
-        // This function was a test using a for-loop in BaseSystem class calling a virtual update function that
-        // passes on component references instead of pointer and size, nice test case of virtual function
-        // overhead (MUCH SLOWER!)
-        // template<int... S>
-        // constexpr void updateById(size_t id, double deltaTime, tuple<TComponents* ...>& componentLists, seq<S...>)
-        //{
-        //	update(deltaTime, get<S>(componentLists)[id]...);
-        //}
 
       public:
         /**
@@ -63,7 +86,7 @@ namespace rv
          * @param size Amount of entities the components represent.
          * @param components List expansion for each component type this system runs through.
          */
-        virtual void update(double deltaTime, size_t size, TComponents* const... components) = 0;
+        virtual void update(double deltaTime, int32_t size, TComponents* const... components) = 0;
     };
 
 } // namespace rv

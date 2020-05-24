@@ -1,6 +1,8 @@
 #include <chrono>
 #include <iostream>
 
+#include "ComflabulationComponent.h"
+#include "ComflabulationSystem.h"
 #include "taskflow/core/taskflow.hpp"
 #include "taskflow/taskflow.hpp"
 
@@ -17,18 +19,18 @@ int main(int argc, char** argv)
     cout.setf(std::ios::fixed, std::ios::floatfield);
     cout.precision(9);
 
-    size_t entityCount = 2'000'000;
+    size_t entityCount = 360'000;
     for (size_t i = 0; i < entityCount; i++)
     {
-        if(i < entityCount/2)
+        if (i < entityCount / 2)
         {
-            ComponentsManager::createComponents(PositionComponent(), VelocityComponent());
+            ComponentsManager::createComponents(PositionComponent(), VelocityComponent(), ComflabulationComponent());
         }
-        else    
+        else
         {
-            ComponentsManager::createComponents(PositionComponent(), VelocityComponent(), OtherComponent());
+            ComponentsManager::createComponents(VelocityComponent(), PositionComponent());
         }
-        
+
         if (i % 1000 == 0)
         {
             float prog = (i / (double)entityCount) * 100.0;
@@ -37,25 +39,27 @@ int main(int argc, char** argv)
     }
 
     ISystem* movementSystem = new MovementSystem();
+    ISystem* comflabuSystem = new ComflabulationSystem();
     const size_t testCount = 1'000;
-	double acc;
-	double times[testCount];
+    double acc = 0;
+    double times[testCount];
     for (size_t i = 0; i < testCount; i++)
     {
         auto start = std::chrono::system_clock::now();
 
         movementSystem->update(0.016);
+        comflabuSystem->update(0.016);
 
         auto end = std::chrono::system_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
         double deltaTime = elapsed.count() / 1'000'000.0;
-	    fprintf(stdout, "It time %fms\n", deltaTime);
+        fprintf(stdout, "It time %fms\n", deltaTime);
         acc += deltaTime;
     }
-	fprintf(stdout, "\n\n");
-	fprintf(stdout, "==============\n");
-	fprintf(stdout, "Test took %fms\n", acc / (double)testCount);
-	fprintf(stdout, "==============\n");
+    fprintf(stdout, "\n\n");
+    fprintf(stdout, "==============\n");
+    fprintf(stdout, "Test took %fms\n", acc / (double)testCount);
+    fprintf(stdout, "==============\n");
 
     getchar();
     return 0;

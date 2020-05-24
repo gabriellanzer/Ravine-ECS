@@ -1,9 +1,9 @@
 #include "MovementSystem.h"
 #include <iostream>
 
-void MovementSystem::update(double deltaTime, const size_t size, VelocityComponent* const vel, PositionComponent* const pos)
+void MovementSystem::update(double deltaTime, int32_t size, VelocityComponent* const vel, PositionComponent* const pos)
 {
-    for (size_t i = 0; i < size; i++)
+    for (int32_t i = 0; i < size; i++)
     {
         const VelocityComponent& v = vel[i];
         PositionComponent& p = pos[i];

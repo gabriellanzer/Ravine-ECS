@@ -71,7 +71,8 @@
     "stack": "cpp",
     "thread": "cpp",
     "xlocmon": "cpp",
-    "xloctime": "cpp"
+    "xloctime": "cpp",
+    "climits": "cpp"
   },
   "cmake.configureOnOpen": true,
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/",
