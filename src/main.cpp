@@ -1,5 +1,4 @@
 #include <chrono>
-#include <iostream>
 
 #include "ComflabulationComponent.h"
 #include "ComflabulationSystem.h"
@@ -16,10 +15,7 @@ using namespace tf;
 
 int main(int argc, char** argv)
 {
-    cout.setf(std::ios::fixed, std::ios::floatfield);
-    cout.precision(9);
-
-    size_t entityCount = 360'000;
+    size_t entityCount = 1'000'000;
     for (size_t i = 0; i < entityCount; i++)
     {
         if (i < entityCount / 2)
@@ -54,12 +50,21 @@ int main(int argc, char** argv)
         auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
         double deltaTime = elapsed.count() / 1'000'000.0;
         fprintf(stdout, "It time %fms\n", deltaTime);
+        times[i] = deltaTime;
         acc += deltaTime;
     }
+    double mean = acc / (double)testCount;
+    double var = 0;
+    for(size_t i = 0; i < testCount; i++)
+    {
+        var += (times[i] - mean) * (times[i] - mean);
+    }
+    var /= (double)testCount;
+    double stddev = sqrt(var);
     fprintf(stdout, "\n\n");
-    fprintf(stdout, "==============\n");
-    fprintf(stdout, "Test took %fms\n", acc / (double)testCount);
-    fprintf(stdout, "==============\n");
+    fprintf(stdout, "===================================================\n");
+    fprintf(stdout, "Test took %fms (mean) %f+/-ms (std-dev)\n", mean, stddev);
+    fprintf(stdout, "===================================================\n");
 
     getchar();
     return 0;

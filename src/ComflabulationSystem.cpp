@@ -1,6 +1,6 @@
 #include "ComflabulationSystem.h"
 
-void ComflabulationSystem::update(double dt, int32_t size, ComflabulationComponent* const comflab) override
+void ComflabulationSystem::update(double dt, int32_t size, ComflabulationComponent* const comflab)
 {
     for (int32_t i = 0; i < size; i++)
     {
