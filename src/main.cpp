@@ -15,8 +15,8 @@ void performanceTest();
 
 int main(int argc, char** argv)
 {
-    // performanceTest();
-    entityTest();
+    performanceTest();
+    //entityTest();
 
     return 0;
 }
@@ -57,7 +57,7 @@ void performanceTest()
         }
         else
         {
-            EntitiesManager::createEntity(Velocity(0, i / 3.0f), Position((float)i, 0));
+            EntitiesManager::createEntity<Velocity, Position>();
         }
 
         if (i % 1000 == 0)
@@ -69,7 +69,7 @@ void performanceTest()
 
     ISystem* comflabuSystem = new ComflabulationSystem();
     ISystem* movementSystem = new MovementSystem();
-    const size_t testCount = 1'000;
+    const size_t testCount = 10'000;
     double acc = 0;
     double times[testCount];
     for (size_t i = 0; i < testCount; i++)
