@@ -1,9 +1,8 @@
 #ifndef ENTITYTESTSYSTEM_HPP
 #define ENTITYTESTSYSTEM_HPP
 
-#include "Core/BaseSystem.hpp"
-#include "Core/Entity.hpp"
-#include "Components/Position.h"
+#include "ravine/ecs.h"
+#include "components/Position.h"
 
 using namespace rv;
 

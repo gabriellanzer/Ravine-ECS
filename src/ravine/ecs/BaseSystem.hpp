@@ -10,29 +10,31 @@ using std::get;
 namespace rv
 {
 
-    template <class... TComponents> class BaseSystem : public ISystem
+    template <class... TComps>
+    class BaseSystem : public ISystem
     {
       private:
-        tuple<CompGroupIt<TComponents>...> compIterators;
-        tuple<TComponents*...> chunkData;
+        tuple<CompGroupIt<TComps>...> compIterators;
+        tuple<TComps*...> chunkData;
 
-        template <int... T> struct FetchPack;
+        template <int... T>
+        struct FetchPack;
 
-        template <> struct FetchPack<>
+        template <>
+        struct FetchPack<>
         {
-            static constexpr intptr_t fetchChunk(tuple<TComponents*...>& chunkData,
-                                                 tuple<CompGroupIt<TComponents>...>& compIt, int32_t groupId,
-                                                 int32_t fetchId)
+            static inline intptr_t fetchChunk(tuple<TComps*...>& chunkData, tuple<CompGroupIt<TComps>...>& compIt,
+                                                 int32_t groupId, int32_t fetchId)
             {
                 return INT32_MAX;
             }
         };
 
-        template <int I, int... S> struct FetchPack<I, S...>
+        template <int I, int... S>
+        struct FetchPack<I, S...>
         {
-            static constexpr int32_t fetchChunk(tuple<TComponents*...>& chunkData,
-                                                tuple<CompGroupIt<TComponents>...>& compIt, int32_t groupId,
-                                                int32_t fetchId)
+            static inline int32_t fetchChunk(tuple<TComps*...>& chunkData, tuple<CompGroupIt<TComps>...>& compIt,
+                                                int32_t groupId, int32_t fetchId)
             {
                 int32_t lGroupSize = 0;
                 get<I>(chunkData) = get<I>(compIt).compIt[groupId].getChunk(fetchId, lGroupSize);
@@ -49,7 +51,8 @@ namespace rv
          * @param deltaTime Time since last update
          * @param componentIt Iterator for each component type this system runs through
          */
-        template <int... S> constexpr void updateUnfold(double deltaTime, seq<S...>)
+        template <int... S>
+        inline void updateUnfold(double deltaTime, seq<S...>)
         {
             const uint8_t groupCount = get<0>(compIterators).count;
             for (uint8_t i = 0; i < groupCount; i++)
@@ -74,8 +77,8 @@ namespace rv
         void update(double deltaTime) final
         {
             // Get Updated List of Iterators
-            compIterators = EntitiesManager::getComponentIterators<TComponents...>();
-            updateUnfold(deltaTime, typename gens<sizeof...(TComponents)>::type());
+            compIterators = EntitiesManager::getComponentIterators<TComps...>();
+            updateUnfold(deltaTime, typename gens<sizeof...(TComps)>::type());
         }
 
         /**
@@ -86,7 +89,7 @@ namespace rv
          * @param size Amount of entities the components represent.
          * @param components List expansion for each component type this system runs through.
          */
-        virtual void update(double deltaTime, int32_t size, TComponents* const... components) = 0;
+        virtual void update(double deltaTime, int32_t size, TComps* const... components) = 0;
     };
 
 } // namespace rv

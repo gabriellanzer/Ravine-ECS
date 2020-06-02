@@ -269,7 +269,7 @@ namespace rv
     inline int32_t ComponentsGroup<TComponent>::shiftClockwise(int32_t count)
     {
         count = min(count, tipOffset);
-        const int32_t mask = signMask(count - tipOffset);
+        const int32_t mask = signMask(count - tipOffset - 1);
         const int32_t shiftCount = (tipOffset - count) * mask;
         const int32_t rollCount = count * mask;
         memcpy(dataPos() + size, dataPos(), rollCount * sizeof(TComponent));       // Roll data

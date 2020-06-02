@@ -51,7 +51,7 @@ namespace rv
         }
 
         template <class... TComponents>
-        inline static Entity& createComponents(const TComponents&... args)
+        inline static Entity& createComponents(TComponents... args)
         {
             using expander = int[];
             MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<Entity, TComponents...>();
@@ -71,16 +71,16 @@ namespace rv
         }
 
       public:
-        template <typename... TComps>
-        inline static Entity& createEntity(TComps... args)
+        template <typename... TComponents>
+        inline static Entity& createEntity(TComponents... args)
         {
-            return EntitiesManager::createComponents<TComps...>(args...);
+            return EntitiesManager::createComponents<TComponents...>(args...);
         }
 
-        template <typename... TComps>
+        template <typename... TComponents>
         inline static Entity& createEntity()
         {
-            return EntitiesManager::createComponents<TComps...>();
+            return EntitiesManager::createComponents<TComponents...>();
         }
     };
 

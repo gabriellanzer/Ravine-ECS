@@ -1,9 +1,11 @@
 #include <chrono>
 
-#include "Components/Comflabulation.h"
-#include "Systems/ComflabulationSystem.h"
-#include "Systems/EntityTestSystem.hpp"
-#include "Systems/MovementSystem.h"
+#include "components/Comflabulation.h"
+#include "systems/ComflabulationSystem.hpp"
+#include "systems/EntityTestSystem.hpp"
+#include "systems/MovementSystem.hpp"
+#include "systems/GravitySystem.hpp"
+#include "systems/BoundarySystem.hpp"
 
 using namespace rv;
 
@@ -16,25 +18,29 @@ int main(int argc, char** argv)
     // performanceTest();
     entityTest();
 
-    getchar();
     return 0;
 }
 
 void entityTest()
 {
+    ISystem* gravitySystem = new GravitySystem();
+    ISystem* boundarySystem = new BoundarySystem();
     ISystem* movementSystem = new MovementSystem();
     ISystem* entityTestSystem = new EntityTestSystem();
 
-    EntitiesManager::createEntity();
     EntitiesManager::createEntity<Position>({3, 4});
     EntitiesManager::createEntity<Position, Velocity>();
-    EntitiesManager::createEntity(Position(1, 0), Velocity(0, 0.25));
+    EntitiesManager::createEntity(Position(1, 0), Velocity(0, 5.0));
     EntitiesManager::createEntity(Position(2, 0), Velocity(0, 0.5), Comflabulation());
+    EntitiesManager::createEntity(Position(3, 10), Velocity(0, 0.25));
 
     fprintf(stdout, "Press RETURN to STOP, any other key to tick.\n");
     do
     {
+        system("cls");
         movementSystem->update(0.016);
+        gravitySystem->update(0.16);
+        boundarySystem->update(0.016);
         entityTestSystem->update(0.016);
         fprintf(stdout, "\n");
     } while (_getwch() != '\r');
@@ -92,4 +98,6 @@ void performanceTest()
     fprintf(stdout, "===================================================\n");
     fprintf(stdout, "Test took %fms (mean) %f+/-ms (std-dev)\n", mean, stddev);
     fprintf(stdout, "===================================================\n");
+    
+    getchar();
 }
