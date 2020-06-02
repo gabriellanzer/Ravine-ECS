@@ -51,7 +51,7 @@ namespace rv
 
         inline void grow(int32_t newCapacity = 0)
         {
-            const int32_t grow = max(capacity, newCapacity) * 1.5f;
+            const int32_t grow = max(capacity, newCapacity) * 1.2f;
             TComponent* newData = (TComponent*)malloc(grow * sizeof(TComponent));
             memcpy(newData, data, capacity * sizeof(TComponent));
             free(data);
@@ -87,7 +87,7 @@ namespace rv
         }
 
         // TODO: Process many groups, each with different masks
-        inline void addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
+        inline CompGroup* addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
         {
             // Check if we have enough space
             if (size + count >= capacity)
@@ -98,8 +98,8 @@ namespace rv
             GroupIt groupIt = getComponentGroup(masks, maskCount);
 
             // Make space for the new components
-            GroupIt it = groupIt;
-            for (it++; it != groups.end(); it++)
+            GroupIt it = groups.end();
+            for (it--; it != groupIt; it--)
             {
                 it->second->rollClockwise(count);
             }
@@ -115,6 +115,16 @@ namespace rv
 
             // Increase Used Size
             size += count;
+
+            return group;
+        }
+
+        inline TComponent& addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent& comp)
+        {
+            CompGroup* group = addComponent(masks, maskCount, &comp, 1);
+
+            // Return Component Reference
+            return group->getLastComponent();
         }
 
         inline GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
@@ -165,6 +175,7 @@ namespace rv
                 regEntryIt = getRegistryEntryIt(comb);
                 regEntryIt->second.insert(mask);
             }
+            delete[] combs;
             delete[] selComb;
             return it;
         }

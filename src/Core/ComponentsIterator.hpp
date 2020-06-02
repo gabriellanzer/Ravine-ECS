@@ -26,7 +26,7 @@ namespace rv
                 size = rSize;
                 return &data[lSize + id];
             }
-            else if (id >= rSize)
+            else // (id >= rSize)
             {
                 size = lSize;
                 return &data[id - rSize];

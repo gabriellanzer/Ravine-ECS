@@ -1,7 +1,7 @@
 #ifndef BASESYSTEM_HPP
 #define BASESYSTEM_HPP
 
-#include "ComponentsManager.hpp"
+#include "EntitiesManager.hpp"
 #include "ISystem.h"
 #include "TemplateIndexPack.h"
 
@@ -74,7 +74,7 @@ namespace rv
         void update(double deltaTime) final
         {
             // Get Updated List of Iterators
-            compIterators = ComponentsManager::getComponentIterators<TComponents...>();
+            compIterators = EntitiesManager::getComponentIterators<TComponents...>();
             updateUnfold(deltaTime, typename gens<sizeof...(TComponents)>::type());
         }
 

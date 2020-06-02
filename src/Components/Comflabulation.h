@@ -1,9 +1,9 @@
-#ifndef COMFLABULATIONCOMPONENT_H
-#define COMFLABULATIONCOMPONENT_H
+#ifndef COMFLABULATION_H
+#define COMFLABULATION_H
 
 #include <string>
 
-struct ComflabulationComponent
+struct Comflabulation
 {
     float thingy;
     int dingy;
