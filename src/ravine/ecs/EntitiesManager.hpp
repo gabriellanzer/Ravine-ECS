@@ -44,6 +44,9 @@ namespace rv
 
 		template <class... TComponents>
 		inline static Entity& createEntity();
+
+		template <class... TComponents>
+		inline static void removeEntity(Entity& entity);
 	};
 
 	template <class... TComponents>
@@ -110,6 +113,19 @@ namespace rv
 	inline Entity& EntitiesManager::createEntity()
 	{
 		return createComponents<TComponents...>();
+	}
+
+	template <class... TComponents>
+	inline void EntitiesManager::removeEntity(Entity& entity)
+	{
+		for (int32_t i = 0; i < 10; i++)
+		{
+			IComponentStorage* storage = reinterpret_cast<IComponentStorage>(entity.compTypes[i]);
+			if (storage != NULL)
+			{
+				storage->removeComponent(entity.id, entity.compTypes, 10);
+			}
+		}
 	}
 
 } // namespace rv

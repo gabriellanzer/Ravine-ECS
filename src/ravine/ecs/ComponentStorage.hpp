@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "IComponentStorage.h"
 #include "ComponentsGroup.hpp"
 #include "ComponentsIterator.hpp"
 
@@ -30,7 +31,7 @@ namespace rv
         using GroupIt = typename GroupsMap<TComp>::iterator;
 
         template <typename TComp>
-        class ComponentStorage
+        class ComponentStorage : public IComponentStorage
         {
 
           private:
@@ -73,6 +74,16 @@ namespace rv
             inline GroupsRegIt getRegistryEntryIt(const intptr_t mask);
 
             inline static ComponentStorage<TComp>* getInstance();
+
+            void swapComponent(int32_t entityId, intptr_t* types, int32_t typesCount) final
+            {
+                // TODO: Implement Swapping    
+            }
+
+            void removeComponent(int32_t entityId, intptr_t* types, int32_t typesCount) final
+            {
+                // TODO: Implement Removal
+            }
         };
 
         template <class TComp>
