@@ -39,24 +39,43 @@ namespace rv
 
         inline TComponent& getComponent(const int32_t compId);
 
+        /**
+         * @brief Returns the last components (before tip).
+         * 
+         * @return TComponent& The last component.
+         */
         inline TComponent& getLastComponent();
 
-        // Should move base ptr, changes tipOffset, size is maintained
+        /**
+         * @brief Rolls the components in a clockwise manner.
+         * Moves base ptr, changes tip offset, size is maintained.
+         * 
+         * @param count Amount of elements to roll clockwise.
+         */
         inline void rollClockwise(const int32_t count);
 
-        // Should move base ptr, changes tipOffset, size is maintained
+        /**
+         * @brief Rolls the components in a counter-clockwise manner.
+         * Moves base ptr, changes tip offset, size is maintained.
+         * 
+         * @param count Amount of elements to roll counter-clockwise.
+         */
         inline void rollCounterClockwise(const int32_t count);
 
         /**
          * @brief Shifts the components in a clockwise manner.
          * Doesn't move base ptr, doesn't change tipOffset, size is increased.
          *
-         * @param count
-         * @return constexpr int32_t
+         * @param count Amount of elements to shift clockwise.
+         * @return int32_t Amount of slots freed left of the tip.
          */
         inline int32_t shiftClockwise(int32_t count);
 
-        // Usefull shortcut for this operation
+        /**
+         * @brief Usefull shortcut for accessing group start ptr.
+         * 
+         * @return TComponent* Group start data position ptr.
+         */
         inline TComponent* dataPos();
 
         // TODO: Implement Shift CounterClockwise

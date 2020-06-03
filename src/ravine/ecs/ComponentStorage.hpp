@@ -11,66 +11,94 @@
 
 namespace rv
 {
-    template <typename TComponent> class ComponentStorage
+    // Empty Namespace to avoid leaking using directives
+    namespace
     {
-        // Group def
-        using CompGroup = ComponentsGroup<TComponent>;
+        template <typename TComp>
+        using CompGroup = ComponentsGroup<TComp>;
         // Registry def
-        typedef std::set<GroupMask, GroupMaskCmp> GroupMaskSet;
-        typedef std::map<intptr_t, GroupMaskSet> GroupsRegistry;
-        typedef typename GroupsRegistry::value_type GroupRegPair;
-        typedef typename GroupsRegistry::iterator GroupsRegIt;
+        using GroupMaskSet = std::set<GroupMask, GroupMaskCmp>;
+        using GroupsRegistry = std::map<intptr_t, GroupMaskSet>;
+        using GroupRegPair = GroupsRegistry::value_type;
+        using GroupsRegIt = GroupsRegistry::iterator;
         // Groups Storage def
-        typedef std::map<GroupMask, CompGroup*, GroupMaskCmp> GroupsMap;
-        typedef typename GroupsMap::value_type GroupMaskPair;
-        typedef typename GroupsMap::iterator GroupIt;
+        template <typename TComp>
+        using GroupsMap = typename std::map<GroupMask, CompGroup<TComp>*, GroupMaskCmp>;
+        template <typename TComp>
+        using GroupMaskPair = typename GroupsMap<TComp>::value_type;
+        template <typename TComp>
+        using GroupIt = typename GroupsMap<TComp>::iterator;
 
-      private:
-        int32_t size = 0;
-        int32_t capacity = 0;
-      public:
-        TComponent* data;
-
-        /**
-         * @brief Organized storage of groups based on their representative mask values.
-         */
-        GroupsMap groups;
-        /**
-         * @brief Organized storage of groups registry masks for each mask combination.
-         */
-        GroupsRegistry groupsRegistry;
-
-        constexpr ComponentStorage() : capacity(10), data((TComponent*)malloc(10 * sizeof(TComponent))) {}
-
-        ~ComponentStorage()
+        template <typename TComp>
+        class ComponentStorage
         {
-            malloc(data);
-            groups.clear();
-            capacity = 0;
-        }
 
-        inline void grow(int32_t newCapacity = 0)
+          private:
+            int32_t size = 0;
+            int32_t capacity = 0;
+
+          public:
+            TComp* data;
+
+            /**
+             * @brief Organized storage of groups based on their representative mask values.
+             */
+            GroupsMap<TComp> groups;
+            /**
+             * @brief Organized storage of groups registry masks for each mask combination.
+             */
+            GroupsRegistry groupsRegistry;
+
+            constexpr ComponentStorage() : capacity(10), data((TComp*)malloc(10 * sizeof(TComp))) {}
+
+            ~ComponentStorage()
+            {
+                malloc(data);
+                groups.clear();
+                capacity = 0;
+            }
+
+            inline void grow(int32_t newCapacity = 0);
+
+            inline CompGroupIt<TComp> getComponentIterator(const intptr_t mask);
+
+            // TODO: Process many groups, each with different masks
+            inline CompGroup<TComp>* addComponent(const intptr_t* masks, const int32_t maskCount, const TComp* comps,
+                                                  int32_t count);
+
+            inline TComp& addComponent(const intptr_t* masks, const int32_t maskCount, const TComp& comp);
+
+            inline GroupIt<TComp> getComponentGroup(const intptr_t* masks, const int32_t maskCount);
+
+            inline GroupsRegIt getRegistryEntryIt(const intptr_t mask);
+
+            inline static ComponentStorage<TComp>* getInstance();
+        };
+
+        template <class TComp>
+        inline void ComponentStorage<TComp>::grow(int32_t newCapacity)
         {
             const int32_t grow = max(capacity, newCapacity) * 1.2f;
-            TComponent* newData = (TComponent*)malloc(grow * sizeof(TComponent));
-            memcpy(newData, data, capacity * sizeof(TComponent));
+            TComp* newData = (TComp*)malloc(grow * sizeof(TComp));
+            memcpy(newData, data, capacity * sizeof(TComp));
             free(data);
             data = newData;
             capacity = grow;
         }
 
-        inline CompGroupIt<TComponent> getComponentIterator(const intptr_t mask)
+        template <class TComp>
+        inline CompGroupIt<TComp> ComponentStorage<TComp>::getComponentIterator(const intptr_t mask)
         {
             // Check if registry entry exists
             GroupsRegIt regIt = groupsRegistry.find(mask);
             if (regIt == groupsRegistry.end())
             {
-                return CompGroupIt<TComponent>();
+                return CompGroupIt<TComp>();
             }
 
             // Create Iterator
             const int32_t groupCount = regIt->second.size();
-            CompGroup** groupsWithMask = new CompGroup*[groupCount];
+            CompGroup<TComp>** groupsWithMask = new CompGroup<TComp>*[groupCount];
             int32_t i = 0;
             for (const GroupMask& mask : regIt->second)
             {
@@ -78,7 +106,7 @@ namespace rv
                 groupsWithMask[i] = groups[mask];
                 ++i;
             }
-            CompGroupIt<TComponent> it(groupsWithMask, groupCount, data);
+            CompGroupIt<TComp> it(groupsWithMask, groupCount, data);
 
             // Safe to perform cleanup now
             delete[] groupsWithMask;
@@ -87,7 +115,10 @@ namespace rv
         }
 
         // TODO: Process many groups, each with different masks
-        inline CompGroup* addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent* comps, int32_t count)
+        template <class TComp>
+        inline ComponentsGroup<TComp>* ComponentStorage<TComp>::addComponent(const intptr_t* masks,
+                                                                             const int32_t maskCount,
+                                                                             const TComp* comps, int32_t count)
         {
             // Check if we have enough space
             if (size + count >= capacity)
@@ -95,17 +126,17 @@ namespace rv
                 grow();
             }
 
-            GroupIt groupIt = getComponentGroup(masks, maskCount);
+            GroupIt<TComp> groupIt = getComponentGroup(masks, maskCount);
 
             // Make space for the new components
-            GroupIt it = groups.end();
+            GroupIt<TComp> it = groups.end();
             for (it--; it != groupIt; it--)
             {
                 it->second->rollClockwise(count);
             }
 
             // Hold group reference
-            CompGroup* group = groupIt->second;
+            CompGroup<TComp>* group = groupIt->second;
 
             // Make space for the new components in the group
             group->shiftClockwise(count);
@@ -119,38 +150,41 @@ namespace rv
             return group;
         }
 
-        inline TComponent& addComponent(const intptr_t* masks, const int32_t maskCount, const TComponent& comp)
+        template <class TComp>
+        inline TComp& ComponentStorage<TComp>::addComponent(const intptr_t* masks, const int32_t maskCount,
+                                                            const TComp& comp)
         {
-            CompGroup* group = addComponent(masks, maskCount, &comp, 1);
+            ComponentsGroup<TComp>* group = addComponent(masks, maskCount, &comp, 1);
 
             // Return Component Reference
             return group->getLastComponent();
         }
 
-        inline GroupIt getComponentGroup(const intptr_t* masks, const int32_t maskCount)
+        template <class TComp>
+        inline GroupIt<TComp> ComponentStorage<TComp>::getComponentGroup(const intptr_t* masks, const int32_t maskCount)
         {
             // Compute Group Mask
             GroupMask mask(masks, maskCount);
 
             // Get existing group
-            GroupIt it = groups.lower_bound(mask);
+            GroupIt<TComp> it = groups.lower_bound(mask);
             if (it != groups.end() && !(groups.key_comp()(mask, it->first)))
             {
                 return it;
             }
 
             // Creates new Group
-            it = groups.insert(it, GroupMaskPair(mask, nullptr));
+            it = groups.insert(it, GroupMaskPair<TComp>(mask, nullptr));
             // Proper Initialization
             int32_t baseOffset = 0;
             if (it != groups.begin())
             {
-                GroupIt lastGroupIt = it;
+                GroupIt<TComp> lastGroupIt = it;
                 --lastGroupIt;
-                CompGroup* lastGroup = lastGroupIt->second;
+                CompGroup<TComp>* lastGroup = lastGroupIt->second;
                 baseOffset = lastGroup->baseOffset + lastGroup->size;
             }
-            it->second = new CompGroup(data, baseOffset);
+            it->second = new CompGroup<TComp>(data, baseOffset);
 
             // Skip current ComponentType ptr
             const intptr_t curType = (intptr_t)getInstance();
@@ -180,7 +214,8 @@ namespace rv
             return it;
         }
 
-        inline GroupsRegIt getRegistryEntryIt(const intptr_t mask)
+        template <class TComp>
+        inline GroupsRegIt ComponentStorage<TComp>::getRegistryEntryIt(const intptr_t mask)
         {
             // Look for registry entry
             GroupsRegIt regIt = groupsRegistry.lower_bound(mask);
@@ -198,13 +233,14 @@ namespace rv
             return regIt;
         }
 
-        inline static ComponentStorage<TComponent>* getInstance()
+        template <class TComp>
+        inline ComponentStorage<TComp>* ComponentStorage<TComp>::getInstance()
         {
-            static ComponentStorage<TComponent>* storage = new ComponentStorage<TComponent>();
+            static ComponentStorage<TComp>* storage = new ComponentStorage<TComp>();
             return storage;
         }
-    };
 
+    } // namespace
 } // namespace rv
 
 #endif

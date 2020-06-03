@@ -15,17 +15,17 @@ void performanceTest();
 
 int main(int argc, char** argv)
 {
-    performanceTest();
-    //entityTest();
+    entityTest();
+    //performanceTest();
 
     return 0;
 }
 
 void entityTest()
 {
+    ISystem* movementSystem = new MovementSystem();
     ISystem* gravitySystem = new GravitySystem();
     ISystem* boundarySystem = new BoundarySystem();
-    ISystem* movementSystem = new MovementSystem();
     ISystem* entityTestSystem = new EntityTestSystem();
 
     EntitiesManager::createEntity<Position>({3, 4});
@@ -48,7 +48,7 @@ void entityTest()
 
 void performanceTest()
 {
-    size_t entityCount = 1'000'000;
+    size_t entityCount = 10'000'000;
     for (int32_t i = 0; i < entityCount; i++)
     {
         if (i > entityCount / 2)

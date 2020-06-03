@@ -1,28 +1,31 @@
 #ifndef TEMPLATEMASKPACK_H
 #define TEMPLATEMASKPACK_H
 
-#include "ComponentStorage.hpp"
 #include <array>
+#include "ComponentStorage.hpp"
 
 namespace rv
 {
 
-    template <typename... T> struct MaskPack;
+    template <typename... T>
+    struct MaskPack;
 
-    template <> struct MaskPack<>
+    template <>
+    struct MaskPack<>
     {
         static constexpr intptr_t mask() { return 0; }
     };
 
     template <typename H, typename... T>
-    struct MaskPack <H, T...>
+    struct MaskPack<H, T...>
     {
-        static constexpr size_t mask() {
+        static constexpr size_t mask()
+        {
             return reinterpret_cast<intptr_t>(ComponentStorage<H>::getInstance()) + MaskPack<T...>::mask();
         }
     };
 
-    template<int N>
+    template <int N>
     using MaskArray = std::array<intptr_t, N>;
 
 } // namespace rv
