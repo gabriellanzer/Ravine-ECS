@@ -1,12 +1,13 @@
 #include <chrono>
+#include <stack>
 
-#include "components/Comflabulation.h"
 #include "systems/ComflabulationSystem.hpp"
 #include "systems/EntityTestSystem.hpp"
 #include "systems/MovementSystem.hpp"
 #include "systems/GravitySystem.hpp"
 #include "systems/BoundarySystem.hpp"
 
+using std::stack;
 using namespace rv;
 
 // Tests Forward declaration
@@ -21,6 +22,14 @@ int main(int argc, char** argv)
     return 0;
 }
 
+const char* options = R"(
+Options:
+-> RETURN to STOP
+-> UP to create new entity (Velocity=%f)
+-> DOWN to remove last entity
+-> Any other key to tick
+)";
+
 void entityTest()
 {
     ISystem* movementSystem = new MovementSystem();
@@ -28,22 +37,44 @@ void entityTest()
     ISystem* boundarySystem = new BoundarySystem();
     ISystem* entityTestSystem = new EntityTestSystem();
 
-    EntitiesManager::createEntity<Position>({3, 4});
-    EntitiesManager::createEntity<Position, Velocity>();
-    EntitiesManager::createEntity(Position(1, 0), Velocity(0, 5.0));
-    EntitiesManager::createEntity(Position(2, 0), Velocity(0, 0.5), Comflabulation());
-    EntitiesManager::createEntity(Position(3, 10), Velocity(0, 0.25));
+    stack<Entity> entities;
+    entities.push(EntitiesManager::createEntity<Position>({2, 0}));
+    entities.push(EntitiesManager::createEntity(Position(1, 0), Velocity(0, 5)));
+    entities.push(EntitiesManager::createEntity<Position, Velocity, Comflabulation>());
 
-    fprintf(stdout, "Press RETURN to STOP, any other key to tick.\n");
-    do
+    while (true)
     {
         system("cls");
-        movementSystem->update(0.016);
-        gravitySystem->update(0.16);
-        boundarySystem->update(0.016);
+
         entityTestSystem->update(0.016);
+        gravitySystem->update(0.16);
+        movementSystem->update(0.016);
+        boundarySystem->update(0.016);
+
+        static float velocity = 1.0f;
         fprintf(stdout, "\n");
-    } while (_getwch() != '\r');
+        fprintf(stdout, options, velocity);
+        char c = _getwch();
+        if(c == '\r') break;
+        if(c == 72) // Up Arrow
+        {
+            velocity += 1.0f;
+        }
+        if(c == 80) // Down Arrow
+        {
+            velocity -= 1.0f;
+        }
+        if(c == 77) // Right Arrow
+        {
+            entities.push(EntitiesManager::createEntity<Position, Velocity>({0, 1}, {0, velocity}));
+        }
+        if(c == 75) // Left Arrow
+        {
+            if (entities.size() == 0) continue;
+            EntitiesManager::removeEntity(entities.top());
+            entities.pop();
+        }
+    }
 }
 
 void performanceTest()

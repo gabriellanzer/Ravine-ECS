@@ -6,17 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "IComponentStorage.h"
 #include "ComponentsGroup.hpp"
 #include "ComponentsIterator.hpp"
+#include "IComponentStorage.h"
 
 namespace rv
 {
     // Empty Namespace to avoid leaking using directives
     namespace
     {
-        template <typename TComp>
-        using CompGroup = ComponentsGroup<TComp>;
         // Registry def
         using GroupMaskSet = std::set<GroupMask, GroupMaskCmp>;
         using GroupsRegistry = std::map<intptr_t, GroupMaskSet>;
@@ -24,7 +22,9 @@ namespace rv
         using GroupsRegIt = GroupsRegistry::iterator;
         // Groups Storage def
         template <typename TComp>
-        using GroupsMap = typename std::map<GroupMask, CompGroup<TComp>*, GroupMaskCmp>;
+        using CompGroup = ComponentsGroup<TComp>;
+        template <typename TComp>
+        using GroupsMap = std::map<GroupMask, CompGroup<TComp>*, GroupMaskCmp>;
         template <typename TComp>
         using GroupMaskPair = typename GroupsMap<TComp>::value_type;
         template <typename TComp>
@@ -54,7 +54,7 @@ namespace rv
 
             ~ComponentStorage()
             {
-                malloc(data);
+                free(data);
                 groups.clear();
                 capacity = 0;
             }
@@ -67,7 +67,7 @@ namespace rv
             inline CompGroup<TComp>* addComponent(const intptr_t* masks, const int32_t maskCount, const TComp* comps,
                                                   int32_t count);
 
-            inline TComp& addComponent(const intptr_t* masks, const int32_t maskCount, const TComp& comp);
+            inline TComp* addComponent(const intptr_t* masks, const int32_t maskCount, const TComp& comp);
 
             inline GroupIt<TComp> getComponentGroup(const intptr_t* masks, const int32_t maskCount);
 
@@ -75,14 +75,22 @@ namespace rv
 
             inline static ComponentStorage<TComp>* getInstance();
 
-            void swapComponent(int32_t entityId, intptr_t* types, int32_t typesCount) final
+            void swapComponent(int32_t entityId, GroupMask oldTypeMask, GroupMask newTypeMask) final
             {
-                // TODO: Implement Swapping    
+                // TODO: Implement Swapping
             }
 
-            void removeComponent(int32_t entityId, intptr_t* types, int32_t typesCount) final
-            {
-                // TODO: Implement Removal
+            void removeComponent(int32_t entityId, GroupMask typeMask) final
+            {              
+                GroupIt<TComp> it = groups.find(typeMask);
+                _ASSERT(it != groups.end());
+                // Remove Component from specific group
+                (*it->second).remComponent(entityId);
+                // Roll all effected groups to fill the gap
+                for (it++; it != groups.end(); it++)
+                {
+                    (*it->second).rollCounterClockwise(1);
+                }
             }
         };
 
@@ -162,7 +170,7 @@ namespace rv
         }
 
         template <class TComp>
-        inline TComp& ComponentStorage<TComp>::addComponent(const intptr_t* masks, const int32_t maskCount,
+        inline TComp* ComponentStorage<TComp>::addComponent(const intptr_t* masks, const int32_t maskCount,
                                                             const TComp& comp)
         {
             ComponentsGroup<TComp>* group = addComponent(masks, maskCount, &comp, 1);
