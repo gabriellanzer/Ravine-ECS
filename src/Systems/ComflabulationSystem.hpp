@@ -8,7 +8,7 @@ using namespace rv;
 
 class ComflabulationSystem : public BaseSystem<Comflabulation>
 {
-    void update(double deltaTime, int32_t size, Comflabulation* const comflab) override
+    void update(double deltaTime, int32_t size, Comflabulation* const comflab) final
     {
         for (int32_t i = 0; i < size; i++)
         {

@@ -8,13 +8,11 @@ using namespace rv;
 
 class EntityTestSystem : public BaseSystem<Entity, Position>
 {
-    void update(double deltaTime, int32_t size, Entity* const entity, Position* const pos) override
+    void update(double deltaTime, int32_t size, Entity* const e, Position* const p) final
     {
         for (int32_t i = 0; i < size; i++)
         {
-            const Entity& e = entity[i];
-            const Position& p = pos[i];
-            fprintf(stdout, "|Ent(%i)|Pos(%.3f,%.3f)", e.id, p.x, p.y);
+            fprintf(stdout, "|Ent(%i)|Pos(%.3f,%.3f)", e[i].id, p[i].x, p[i].y);
         }
     }
 };

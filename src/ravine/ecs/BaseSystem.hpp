@@ -55,6 +55,12 @@ namespace rv
         inline void updateUnfold(double deltaTime, seq<S...>)
         {
             const uint8_t groupCount = get<0>(compIterators).count;
+            int32_t offset = 0;
+            int32_t batchSize = 0;
+            for (uint8_t i = 0; i < groupCount; i++)
+            {
+                batchSize += get<0>(compIterators).compIt[i].getSize();
+            }
             for (uint8_t i = 0; i < groupCount; i++)
             {
                 int32_t fetchIt = 0;
@@ -62,8 +68,9 @@ namespace rv
                 while (fetchIt < groupSize)
                 {
                     int32_t chunkSize = FetchPack<S...>::fetchChunk(chunkData, compIterators, i, fetchIt);
-                    update(deltaTime, chunkSize, get<S>(chunkData)...);
+                    update(deltaTime, offset, batchSize, chunkSize, get<S>(chunkData)...);
                     fetchIt += chunkSize;
+                    offset += chunkSize;
                 }
             }
         }
@@ -89,7 +96,19 @@ namespace rv
          * @param size Amount of entities the components represent.
          * @param components List expansion for each component type this system runs through.
          */
-        virtual void update(double deltaTime, int32_t size, TComps* const... components) = 0;
+        inline virtual void update(double deltaTime, int32_t offset, int32_t size, int32_t batchSize, TComps* const... components) {
+            update(deltaTime, batchSize, components...);
+        };
+
+        /**
+         * @brief Update virtual function to be overriten by a System implementation.
+         *  Called by the \see{BaseSystem} class through \see{SystemManager} command.
+         *
+         * @param deltaTime Timespan between last and current frame (in seconds).
+         * @param size Amount of entities the components represent.
+         * @param components List expansion for each component type this system runs through.
+         */
+        inline virtual void update(double deltaTime, int32_t batchSize, TComps* const... components) { };
     };
 
 } // namespace rv

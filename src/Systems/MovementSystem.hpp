@@ -10,7 +10,7 @@ using namespace rv;
 class MovementSystem : public BaseSystem<Velocity, Position>
 {
   public:
-    void update(double deltaTime, int32_t size, Velocity* const vel, Position* const pos) override
+    void update(double deltaTime, int32_t size, Velocity* const vel, Position* const pos) final
     {
         for (int32_t i = 0; i < size; i++)
         {

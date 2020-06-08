@@ -16,8 +16,8 @@ void performanceTest();
 
 int main(int argc, char** argv)
 {
-	entitiesTest();
-	//performanceTest();
+	//entitiesTest();
+	performanceTest();
 
 	return 0;
 }
