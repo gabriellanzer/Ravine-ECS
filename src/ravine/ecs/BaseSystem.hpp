@@ -14,7 +14,7 @@ namespace rv
     class BaseSystem : public ISystem
     {
       private:
-        tuple<CompGroupIt<TComps>...> compIterators;
+        tuple<CompGroupIt<TComps>...> compGroupIts;
         tuple<TComps*...> chunkData;
 
         template <int... T>
@@ -56,20 +56,20 @@ namespace rv
         {
             beforeUpdate(deltaTime);
 
-            const uint8_t groupCount = get<0>(compIterators).count;
+            const uint8_t groupCount = get<0>(compGroupIts).count;
             int32_t offset = 0;
             int32_t batchSize = 0;
             for (uint8_t i = 0; i < groupCount; i++)
             {
-                batchSize += get<0>(compIterators).compIt[i].getSize();
+                batchSize += get<0>(compGroupIts).compIt[i].getSize();
             }
             for (uint8_t i = 0; i < groupCount; i++)
             {
                 int32_t fetchIt = 0;
-                int32_t groupSize = get<0>(compIterators).compIt[i].getSize();
+                int32_t groupSize = get<0>(compGroupIts).compIt[i].getSize();
                 while (fetchIt < groupSize)
                 {
-                    int32_t chunkSize = FetchPack<S...>::fetchChunk(chunkData, compIterators, i, fetchIt);
+                    int32_t chunkSize = FetchPack<S...>::fetchChunk(chunkData, compGroupIts, i, fetchIt);
                     update(deltaTime, offset, batchSize, chunkSize, get<S>(chunkData)...);
                     fetchIt += chunkSize;
                     offset += chunkSize;
@@ -88,7 +88,7 @@ namespace rv
         void update(double deltaTime) final
         {
             // Get Updated List of Iterators
-            compIterators = EntitiesManager::getComponentIterators<TComps...>();
+            compGroupIts = EntitiesManager::getComponentIterators<TComps...>();
             updateUnfold(deltaTime, typename gens<sizeof...(TComps)>::type());
         }
 
