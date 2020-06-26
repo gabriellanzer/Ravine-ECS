@@ -34,11 +34,12 @@ namespace rv
         }
     };
 
+    // TODO: Rename to GroupQuery
     template <typename TComp> struct CompGroupIt
     {
         // Iterator Group Fields
         CompIt<TComp> compIt[50];
-        // Current Group Iterator
+        // Current Group Count
         uint8_t count;
 
         constexpr CompGroupIt() : count(0) {}
