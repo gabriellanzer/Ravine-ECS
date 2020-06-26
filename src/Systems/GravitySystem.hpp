@@ -10,7 +10,7 @@ using namespace rv;
 class GravitySystem : public BaseSystem<Velocity>
 {
   public:
-    void update(double deltaTime, int32_t size, Velocity* const vel) override
+    void update(double deltaTime, int32_t size, Velocity* const vel) final
     {
         for (int32_t i = 0; i < size; i++)
         {
