@@ -35,8 +35,6 @@ namespace rv
          */
         inline int32_t remComponent(const int32_t* compIds, const int32_t count);
 
-        inline void remComponent(const int32_t compId);
-
         inline TComponent* getComponent(const int32_t compId);
 
         /**
@@ -282,12 +280,6 @@ namespace rv
         rollCounterClockwise(rightComprCount);
 
         return leftComprCount;
-    }
-
-    template <class TComponent>
-    inline void ComponentsGroup<TComponent>::remComponent(const int32_t compId)
-    {
-        remComponent(&compId, 1);
     }
 
     template <class TComponent>
