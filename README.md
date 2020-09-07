@@ -15,12 +15,17 @@ The concept of cyclic arrays is to avoid re-allocating the whole array each time
 Here is a representation of the cyclic array being pushed aside (clock-wise roll operation), which demonstrates how the cyclic behaviour works.
 
 With offset at 0 (aligned):
+
 ![Cyclic Array 0](images/cyclic_array_0.png)
+
 Being push aside (clock-wise):
+
 ![Cyclic Array 1](images/cyclic_array_1.png)
 ![Cyclic Array 2](images/cyclic_array_2.png)
 ![Cyclic Array 3](images/cyclic_array_3.png)
+
 The final state, offset at 3:
+
 ![Cyclic Array 4](images/cyclic_array_4.png)
 
 Instead of accessing this array at the first element, the iteration happens from the position 3 (zero-based) to position 5, and wraps around from 0 to 2. The idea is expanded through groups that are shared across many component storages (when they represent complex archtypes). The idea is to ensure each of the pointers match the correct components of a given entity, regardless of the group offset. The following chapter will explain the basic storage operations and how the actual iteration works.
