@@ -1,6 +1,10 @@
 # Ravine ECS
 This repository is the *Entity Component System* architecture implementation to be integrated with the [Ravine](https://github.com/gabriellanzer/Ravine) framework. It is written using C++14 features and has a special storage focused on linear cache access to ensure extreme performance. That is achieved through the concept of cyclic arrays, and done through a couple of control operations. The performance was ensured through a benchmark against Skypjack's [EnTT](https://github.com/skypjack/entt) library, and it's repo can be found [here](https://github.com/gabriellanzer/Ravine-ECS-Benchmark) (TL;DR: got almost twice the performance), I also did an [integration with OpenGL and a comparison of the DOD ECS vs Bad OOD](https://github.com/gabriellanzer/Ravine-ECS-Showdown) - sorry linux users, Visual Studio solution only...
 
+## How to use
+
+TODO - Document the general API usage. Code is mostly self-explanatory though...
+
 ## Storage Scheme 
 To ensure the lowest cache-miss frequencies as possible, while mantaining a few nice features of linear access, I decided to have storage **arrays per component types**. Each of these arrays is holds groups of components, **ordered by their entities archtypes**. A given storage state is represented by the following diagram:
 
@@ -31,16 +35,51 @@ The final state, offset at 3:
 Instead of accessing this array at the first element, the iteration happens from the position 3 (zero-based) to position 5, and wraps around from 0 to 2. The idea is expanded through groups that are shared across many component storages (when they represent complex archtypes). The idea is to ensure each of the pointers match the correct components of a given entity, regardless of the group offset. The following chapter will explain the basic storage operations and how the actual iteration works.
 
 ## Storage Operations
+For performance reasons, both the creation and removal of entities might be deferred to the end of the frame. From the storage perspective, it receives a list of components to work with, thus enabling the batching of operations. These operations could happen atomically, but require special handling of current iteration pointers (on the TODO list for now).
 
+Keep in mind that the actual entity creation and destruction operations need to manage multiple storages at the same time, and every storage operation
 
-### Insertion
+### **Insertion**
+The following diagrams represent the insertion of components of a given type on the proper storage, **A, B and C** are groups of different archtypes whose components **a4, b6, b7 and c8** belong to:
+
+![Creation Intro](images/creation_intro.png)
+
+Check if the storage has enough size:
+
+![Check Storage Size](images/creation_0.png)
+
+Figure what component goes where:
+
+![Figure insert positions](images/creation_1.png)
+
+From **right to left**, start to open spaces for complex archtype groups. Roll group C three positions (for **a4, b6, b7**):
+
+![Make space for A and B](images/creation_2.png)
+
+To insert **c8** at the end of the array (before **c0**), shift **c7** left (which wraps to the end of the group):
+
+![Shift for c8 insertion](images/creation_3.png)
+
+Now we can insert **c8** and make space for **a4** by rolling the B group in a clock-wise manner:
+
+![Roll B and insert c8](images/creation_4.png)
+
+To insert **b6 and b7** shift components to the left and wrap around:
+
+![Shift to insert b6 and b7](images/creation_5.png)
+
+All space is open, now to insert **a4, b6 and b7**:
+
+![Insert remaining components](images/creation_6.png)
+
+The final storage state:
+
+![Final insertion state](images/creation_7.png)
+
+### **Removal**
 
 TODO
 
-### Removal
-
-TODO
-
-### Iteration
+### **Iteration**
 
 TODO
