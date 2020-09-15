@@ -6,13 +6,13 @@ This repository is the **Entity Component System** architecture implementation t
 TODO - Document the general API usage. Code is mostly self-explanatory though...
 
 ## Storage Scheme 
-To ensure the lowest cache-miss frequencies as possible, while mantaining a few nice features of linear access, I decided to have storage **arrays per component types**. Each of these arrays is holds groups of components, **ordered by their entities archtypes**. A given storage state is represented by the following diagram:
+To ensure the lowest cache-miss frequencies as possible, while mantaining a few nice features of linear access, I decided to have storage **arrays per component types**. Each of these arrays is holds groups of components, **ordered by their entities archetypes**. A given storage state is represented by the following diagram:
 
 ![Storage State Diagram](/images/groups_representation.png)
 
 
 ## Cyclic Arrays
-There are a few interesting points. In this representation, each component has the internal entity id (position inside the group) written on it. It is possible to see that some groups have an offset with respect to their actual initial positions (id 0 is shifted). That is due to the **cyclic behaviour** of each group. Most notably, the **Blue Group** represents the entity archtype of types A and B, and it has different offsets on each of it's storage arrays (0 on Storage\<A> and 2 on Storage\<B>).
+There are a few interesting points. In this representation, each component has the internal entity id (position inside the group) written on it. It is possible to see that some groups have an offset with respect to their actual initial positions (id 0 is shifted). That is due to the **cyclic behaviour** of each group. Most notably, the **Blue Group** represents the entity archetype of types A and B, and it has different offsets on each of it's storage arrays (0 on Storage\<A> and 2 on Storage\<B>).
 
 The concept of cyclic arrays is to avoid re-allocating the whole array each time a insertion needs to happen, and to avoid any kind of look-up table, which would trash the cache lines. In this concept, there are a few operations needed to maintain the arrays in order (respecting the offset). There is, also, a special way of iterating through those arrays - we want to squeeze every inch of the CPU.
 
@@ -32,15 +32,22 @@ The final state, offset at 3:
 
 ![Cyclic Array 4](images/cyclic_array_4.png)
 
-Instead of accessing this array at the first element, the iteration happens from the position 3 (zero-based) to position 5, and wraps around from 0 to 2. The idea is expanded through groups that are shared across many component storages (when they represent complex archtypes). The idea is to ensure each of the pointers match the correct components of a given entity, regardless of the group offset. The following chapter will explain the basic storage operations and how the actual iteration works.
+Instead of accessing this array at the first element, the iteration happens from the position 3 (zero-based) to position 5, and wraps around from 0 to 2. The idea is expanded through groups that are shared across many component storages (when they represent complex archetypes). The idea is to ensure each of the pointers match the correct components of a given entity, regardless of the group offset. The following chapter will explain the basic storage operations and how the actual iteration works.
 
 ## Storage Operations
 For performance reasons, both the creation and removal of entities might be deferred to the end of the frame. From the storage perspective, it receives a list of components to work with, thus enabling the batching of operations. These operations could happen atomically, but require special handling of current iteration pointers (on the TODO list for now).
 
-Keep in mind that the actual entity creation and destruction operations need to manage multiple storages at the same time, and every storage operation
+Keep in mind that the actual entity creation and destruction operations need to manage multiple storages at the same time, and every storage operation manages multiple component groups. All of that is bound to the registry of component groups, described above.
+
+### **Groups Registry**
+Components groups, as described on the [Storage Scheme](https://github.com/gabriellanzer/Ravine-ECS#storage-scheme), are definitions of **agroupments by entity archetypes** bound across multiple component storages. The registry holds the combination of every possible query result per archetype request. For instance, if given system requests for the components of type **A and B** it performs a query through the storages **A** and **B** for all the combinations of the archetype **{A, B}**, which are: **{A, B}, {A} and {B}**.
+
+On a given case, it might happen that the storage **A** only has the group **{A, B}** registered whilst the storage **B** has both **{A, B} and {B}**, because there are no entities with a single (and only) component **A**. That lead me to create a distributed group registry, per component storage, whereas a new group is registered for each type of that group archetype. Aka.: A new group **{A, B, C}** will be registered on the storages **A**, **B** and **C** with all the possible archetype combinations that are valid for each storage type.
+
+To get the valid combinations per storage, I perform the set exclusion for the archetype and compute all valide permutations. On the above example, the storage **A** will have combinations **{B, C}, {B} and {C}** registered, whilst the storage **B** will have combinations **{A, C}, {A} and {C}**, and storage **C** follows the same rule.
 
 ### **Insertion**
-The following diagrams represent the insertion of components of a given type on the proper storage, **A, B and C** are groups of different archtypes whose components **a4, b6, b7 and c8** belong to. Keep in mind that the components are sorted the same way that the groups are.
+The following diagrams represent the insertion of components of a given type on the proper storage, **A, B and C** are groups of different archetypes whose components **a4, b6, b7 and c8** belong to. Keep in mind that the components are sorted the same way that the groups are.
 
 ![Creation Intro](images/creation_intro.png)
 
@@ -52,7 +59,7 @@ Figure what component goes where:
 
 ![Figure insert positions](images/creation_1.png)
 
-From **right to left**, start to open spaces for complex archtype groups. Roll group C three positions (for **a4, b6, b7**):
+From **right to left**, start to open spaces for complex archetype groups. Roll group C three positions (for **a4, b6, b7**):
 
 ![Make space for A and B](images/creation_2.png)
 
@@ -101,7 +108,6 @@ That must be closed by rolling the group in a counter-clockwise manner:
 Inside each group, the compression happens from the left to the right as well:
 
 ![Compression of Group C (left)](images/removal_4.png)
-
 ![Compression of Group C (right)](images/removal_5.png)
 
 The ammount of spaces to be filled are accumulated through the compression operations, so they need to to be calculated separatelly.
