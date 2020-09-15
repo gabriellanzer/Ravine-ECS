@@ -3,7 +3,7 @@ This repository is the **Entity Component System** architecture implementation t
 
 ## How to use
 
-TODO - Document the general API usage. Code is mostly self-explanatory though...
+TODO - Document the general API usage. Code is mostly self-explanatory though... And the *main.cpp* shows an example. Besides that, the [OpenGL integration repo](https://github.com/gabriellanzer/Ravine-ECS-Showdown) is quite interesting in performance-wise operations (though very WIP).
 
 ## Storage Scheme 
 To ensure the lowest cache-miss frequencies as possible, while mantaining a few nice features of linear access, I decided to have storage **arrays per component types**. Each of these arrays is holds groups of components, **ordered by their entities archetypes**. A given storage state is represented by the following diagram:
@@ -44,7 +44,7 @@ Components groups, as described on the [Storage Scheme](https://github.com/gabri
 
 On a given case, it might happen that the storage **A** only has the group **{A, B}** registered whilst the storage **B** has both **{A, B} and {B}**, because there are no entities with a single (and only) component **A**. That lead me to create a distributed group registry, per component storage, whereas a new group is registered for each type of that group archetype. Aka.: A new group **{A, B, C}** will be registered on the storages **A**, **B** and **C** with all the possible archetype combinations that are valid for each storage type.
 
-To get the valid combinations per storage, I perform the set exclusion for the archetype and compute all valide permutations. On the above example, the storage **A** will have combinations **{B, C}, {B} and {C}** registered, whilst the storage **B** will have combinations **{A, C}, {A} and {C}**, and storage **C** follows the same rule.
+To get the valid combinations per storage, I perform the set exclusion for the archetype and compute all valid permutations without type, plus the own storage type. On the above example, the storage **A** will have combinations **{A, B, C}, {A, B} and {A, C}** as well as it's own type **{A}** registered, whilst the storage **B** will have combinations **{B, A, C}, {B, A}, {B, C}, {B}**; the storage **C** follows the same rule. Keep in mind that the order doesn't matter, so **{A, B} equals {B, A}**.
 
 ### **Insertion**
 The following diagrams represent the insertion of components of a given type on the proper storage, **A, B and C** are groups of different archetypes whose components **a4, b6, b7 and c8** belong to. Keep in mind that the components are sorted the same way that the groups are.
@@ -120,4 +120,41 @@ And the final storage state:
 
 ### **Iteration**
 
-TODO
+The iteration of components are bound to the [groups registry](https://github.com/gabriellanzer/Ravine-ECS#groups-registry). Whenever a system requests for an archetype of components, for instance **{A, B}**, it invokes queries for the storages of types **A** and **B**. Those queries return, per storage type, the list of groups that must be iterated through. That iteration happens as stated on the [cyclic array definition](https://github.com/gabriellanzer/Ravine-ECS#cyclic-arrays), with an aditional alignment limitation across groups. The following diagrams illustrate the iteration process:
+
+![Iteration Intro](images/iteration_intro.png)
+
+First we select the storages of type **A** and **B**:
+
+![Storage Selection](images/iteration_0.png)
+
+Then we perform a query of the entities with, at least, the archetype **{A, B}**, which return a selection of groups:
+
+![Archetype Query](images/iteration_1.png)
+
+The groups are ordered in the registry the same way they are allocated (left to right):
+
+![Yellow Group Aligned](images/update_0.png)
+
+A system has it's update function called for each group iteration step. The number of steps might range from 1 to N, with N beeing the number of types on the query archetype. This happens due to the groups alignment across storages. On step, the initial pointer per component type and array sizes are adjusted to match the step range. The Yellow Group has a single iteration step, because it is aligned:
+
+![Yellow Iteration Step 1, It 0](images/update_0_0.png)
+![Yellow Iteration Step 1, It 1](images/update_0_1.png)
+![Yellow Iteration Step 1, It 2](images/update_0_2.png)
+
+The blue group is misaligned across component storages:
+
+![Blue Group Misaligned](images/update_1+2.png)
+
+And iteration happens in two steps, from left to right and wraps around. The first step goes as following:
+
+![Blue Iteration Step 1, It 0](images/update_1_0.png)
+![Blue Iteration Step 1, It 1](images/update_1_1.png)
+![Blue Iteration Step 1, It 2](images/update_1_2.png)
+
+The second step is aligned:
+
+![Blue Iteration Step 2, It 0](images/update_2_0.png)
+![Blue Iteration Step 2, It 1](images/update_2_1.png)
+
+As a result, a storage iteration has a best and worst cache-coherency access pattern. TODO: Finish results...
