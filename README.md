@@ -40,7 +40,7 @@ For performance reasons, both the creation and removal of entities might be defe
 Keep in mind that the actual entity creation and destruction operations need to manage multiple storages at the same time, and every storage operation
 
 ### **Insertion**
-The following diagrams represent the insertion of components of a given type on the proper storage, **A, B and C** are groups of different archtypes whose components **a4, b6, b7 and c8** belong to:
+The following diagrams represent the insertion of components of a given type on the proper storage, **A, B and C** are groups of different archtypes whose components **a4, b6, b7 and c8** belong to. Keep in mind that the components are sorted the same way that the groups are.
 
 ![Creation Intro](images/creation_intro.png)
 
@@ -78,7 +78,39 @@ The final storage state:
 
 ### **Removal**
 
-TODO
+The removal operation is design to work with a list of Components marked to be destroyed at the current frame. In the following diagrams, the components **a3, b4, b7, c4, c5 and c8** will be removed from the storage groups **A, B and C**. Like the creation operation, the components are sorted the same way of the groups they belong to.
+
+![Removal Intro](images/removal_intro.png)
+
+First, we compute the compression operation:.
+
+![Compression Operations](images/removal_0.png)
+
+Each compression happens on a per-group basis, from left to right:
+
+![Compression of Group A](images/removal_1.png)
+
+When a new group is compressed it opens space in between:
+
+![Compression of Group B](images/removal_2.png)
+
+That must be closed by rolling the group in a counter-clockwise manner:
+
+![Filling the Gaps (A and B)](images/removal_3.png)
+
+Inside each group, the compression happens from the left to the right as well:
+
+![Compression of Group C (left)](images/removal_4.png)
+
+![Compression of Group C (right)](images/removal_5.png)
+
+The ammount of spaces to be filled are accumulated through the compression operations, so they need to to be calculated separatelly.
+
+![Filling the Gaps (B and C)](images/removal_6.png)
+
+And the final storage state:
+
+![Final removal state](images/removal_7.png)
 
 ### **Iteration**
 
