@@ -80,18 +80,7 @@ namespace rv
                 // TODO: Implement Swapping
             }
 
-            void removeComponent(int32_t entityId, GroupMask typeMask) final
-            {              
-                GroupIt<TComp> it = groups.find(typeMask);
-                _ASSERT(it != groups.end());
-                // Remove Component from specific group
-                (*it->second).remComponent(entityId);
-                // Roll all effected groups to fill the gap
-                for (it++; it != groups.end(); it++)
-                {
-                    (*it->second).rollCounterClockwise(1);
-                }
-            }
+            void removeComponent(int32_t entityId, GroupMask typeMask) final;
         };
 
         template <class TComp>
@@ -257,6 +246,20 @@ namespace rv
         {
             static ComponentStorage<TComp>* storage = new ComponentStorage<TComp>();
             return storage;
+        }
+
+        template <class TComp>
+        inline void ComponentStorage<TComp>::removeComponent(int32_t entityId, GroupMask typeMask)
+        {
+            GroupIt<TComp> it = groups.find(typeMask);
+            _ASSERT(it != groups.end());
+            // Remove Component from specific group
+            (*it->second).remComponent(&entityId, 1);
+            // Roll all effected groups to fill the gap
+            for (it++; it != groups.end(); it++)
+            {
+                (*it->second).rollCounterClockwise(1);
+            }
         }
 
     } // namespace
