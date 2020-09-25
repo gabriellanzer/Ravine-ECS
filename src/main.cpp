@@ -16,8 +16,8 @@ void performanceTest();
 
 int main(int argc, char** argv)
 {
-	//entitiesTest();
-	performanceTest();
+	entitiesTest();
+	//performanceTest();
 
 	return 0;
 }
@@ -36,11 +36,6 @@ void entitiesTest()
 	ISystem* gravitySystem = new GravitySystem();
 	ISystem* boundarySystem = new BoundarySystem();
 	ISystem* entityTestSystem = new EntityTestSystem();
-
-	stack<Entity> entities;
-	entities.push(EntitiesManager::createEntity<Position>({2, 0}));
-	entities.push(EntitiesManager::createEntity(Position(1, 0), Velocity(0, 5)));
-	entities.push(EntitiesManager::createEntity<Position, Velocity, Comflabulation>());
 
 	while (true)
 	{
@@ -66,13 +61,12 @@ void entitiesTest()
 		}
 		if(c == 77) // Right Arrow
 		{
-			entities.push(EntitiesManager::createEntity<Position, Velocity>({0, 1}, {0, velocity}));
+			Entity entity = EntitiesManager::createEntity<Position, Velocity>({0, 1}, {0, velocity});
+			EntitiesManager::lateRemoveEntity(entity);
 		}
 		if(c == 75) // Left Arrow
 		{
-			if (entities.size() == 0) continue;
-			EntitiesManager::removeEntity(entities.top());
-			entities.pop();
+			EntitiesManager::flushEntityOperations();
 		}
 	}
 }

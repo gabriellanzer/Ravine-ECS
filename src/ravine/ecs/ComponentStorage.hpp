@@ -81,6 +81,8 @@ namespace rv
             }
 
             void removeComponent(int32_t entityId, GroupMask typeMask) final;
+
+            void removeComponents(EntityIdList entityIdList) final;
         };
 
         template <class TComp>
@@ -259,6 +261,41 @@ namespace rv
             for (it++; it != groups.end(); it++)
             {
                 (*it->second).rollCounterClockwise(1);
+            }
+        }
+
+        template <class TComp>
+        inline void ComponentStorage<TComp>::removeComponents(EntityIdList entityIdList)
+        {
+            int32_t accRoll = 0;
+            EntityIdList::iterator beg = entityIdList.begin();
+            GroupIt<TComp> nextIt = groups.find(beg->first);
+            while (beg != entityIdList.end())
+            {
+                GroupIt<TComp> it = nextIt;
+                _ASSERT(it != groups.end());
+                // Remove Component from specific group
+                std::vector<int>* entityIds = beg->second;
+                int32_t roll = (*it->second).remComponent(entityIds->data(), entityIds->size());
+                (*it->second).rollCounterClockwise(accRoll);
+                accRoll += roll;
+                // Get next group mask
+                beg++;
+                // And get next group it
+                if (beg == entityIdList.end())
+                {
+                    nextIt = groups.end();
+                }
+                else
+                {
+                    nextIt = groups.find(beg->first);
+                }
+                int32_t len = std::distance(it, nextIt);
+                // Roll all effected groups to fill the gap (until next group removal)
+                for (it++; it != nextIt; it++)
+                {
+                    (*it->second).rollCounterClockwise(accRoll);
+                }
             }
         }
 
