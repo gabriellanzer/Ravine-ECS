@@ -28,13 +28,19 @@ namespace rv
          * @brief Map with a list of entities to be destroyed for each of their archetype groups.
          * 
          */
-        static EntityIdList entIdToDestroy;
+        static GroupIdList entIdToDestroy;
 
         /**
          * @brief Set with all storages whose at least one entity has been removed from.
          * 
          */
         static std::unordered_set<IComponentStorage*> storagesToDestroy;
+
+        /**
+         * @brief Table of positions for unique entity id.
+         * 
+         */
+        static std::vector<Entity*> entitiesTable;
 
       public:
         /**
@@ -99,7 +105,7 @@ namespace rv
     };
 
     // Static Definitions
-    EntityIdList EntitiesManager::entIdToDestroy;
+    GroupIdList EntitiesManager::entIdToDestroy;
     std::unordered_set<IComponentStorage*> EntitiesManager::storagesToDestroy;
 
     template <class... TComponents>
@@ -175,10 +181,11 @@ namespace rv
         for (int32_t i = 0; i < entity.typesCount; i++)
         {
             IComponentStorage* storage = reinterpret_cast<IComponentStorage*>(entity.compTypes[i]);
-            storage->removeComponent(entity.id, typeMask);
+            storage->removeComponent(entity.groupId, typeMask);
         }
         // Set as invalid
         entity.id = -1;
+        entity.groupId = -1;
     }
 
     inline void EntitiesManager::lateRemoveEntity(Entity& entity)
@@ -194,7 +201,7 @@ namespace rv
 
         // Get existing group list or create new one
         std::vector<int32_t>* groupIds;
-        EntityIdList::iterator it = entIdToDestroy.lower_bound(typeMask);
+        GroupIdList::iterator it = entIdToDestroy.lower_bound(typeMask);
         if (it != entIdToDestroy.end() && !(entIdToDestroy.key_comp()(typeMask, it->first)))
         {
             groupIds = it->second;
@@ -202,7 +209,7 @@ namespace rv
         else
         {
             groupIds = new std::vector<int32_t>();
-            entIdToDestroy.insert(it, EntityIdPair(typeMask, groupIds));
+            entIdToDestroy.insert(it, GroupIdPair(typeMask, groupIds));
         }
 
         // Add entity to remove group
@@ -210,12 +217,13 @@ namespace rv
 
         // Set as invalid
         entity.id = -1;
+        entity.groupId = -1;
     }
 
     inline void EntitiesManager::flushEntityOperations()
     {
         // Sorts and make unique entities to destroy on all groups
-        for (EntityIdList::iterator it = entIdToDestroy.begin(); it != entIdToDestroy.end(); it++)
+        for (GroupIdList::iterator it = entIdToDestroy.begin(); it != entIdToDestroy.end(); it++)
         {
             std::vector<int32_t>* idsList = it->second;
             std::sort(idsList->begin(), idsList->end());

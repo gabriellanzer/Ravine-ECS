@@ -82,7 +82,7 @@ namespace rv
 
             void removeComponent(int32_t entityId, GroupMask typeMask) final;
 
-            void removeComponents(EntityIdList entityIdList) final;
+            void removeComponents(GroupIdList groupIdList) final;
         };
 
         template <class TComp>
@@ -265,12 +265,12 @@ namespace rv
         }
 
         template <class TComp>
-        inline void ComponentStorage<TComp>::removeComponents(EntityIdList entityIdList)
+        inline void ComponentStorage<TComp>::removeComponents(GroupIdList groupIdList)
         {
             int32_t accRoll = 0;
-            EntityIdList::iterator beg = entityIdList.begin();
+            GroupIdList::iterator beg = groupIdList.begin();
             GroupIt<TComp> nextIt = groups.find(beg->first);
-            while (beg != entityIdList.end())
+            while (beg != groupIdList.end())
             {
                 GroupIt<TComp> it = nextIt;
                 _ASSERT(it != groups.end());
@@ -282,7 +282,7 @@ namespace rv
                 // Get next group mask
                 beg++;
                 // And get next group it
-                if (beg == entityIdList.end())
+                if (beg == groupIdList.end())
                 {
                     nextIt = groups.end();
                 }

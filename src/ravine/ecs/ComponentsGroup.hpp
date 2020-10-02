@@ -17,13 +17,29 @@ namespace rv
         int32_t size = 0;
         int32_t tipOffset = 0;
 
+        /**
+         * @brief Constructs a group from a storage data array pointer reference
+         *  and the group base offset position with respect to that array start.
+         * 
+         */
         constexpr ComponentsGroup(TComponent* const& storageData, const int32_t storageOffset)
             : data(storageData), baseOffset(storageOffset)
         {
         }
 
+        /**
+         * @brief Batch adding of component to this group.
+         * 
+         * @param comps Component data array to copy from.
+         * @param count Amount of components in the array.
+         */
         inline void addComponent(const TComponent* comps, const uint32_t count);
 
+        /**
+         * @brief Adds a single component to this group.
+         * 
+         * @param comp Component data to copy from. 
+         */
         inline void addComponent(const TComponent& comp);
 
         /**
@@ -35,6 +51,12 @@ namespace rv
          */
         inline int32_t remComponent(const int32_t* compIds, const int32_t count);
 
+        /**
+         * @brief Get a pointer to the component that matches the given id.
+         * 
+         * @param compId Id of the requested component.
+         * @return TComponent* Pointer for the component address.
+         */
         inline TComponent* getComponent(const int32_t compId);
 
         /**
@@ -106,13 +128,13 @@ namespace rv
         memcpy(dst, comps + 0, rightCount * sizeof(Entity)); // Copy to the end of the group
         for (int32_t i = 0; i < rightCount; i++)             // Update Entity IDs
         {
-            dst[i].id = size + i;
+            dst[i].groupId = size + i;
         }
         dst = dataPos() + tipOffset - leftCount;
         memcpy(dst, comps + rightCount, leftCount * sizeof(Entity)); // Copy components to the left of the tip
         for (int32_t i = 0; i < leftCount; i++)                      // Update Entity IDs
         {
-            dst[i].id = size - leftCount + rightCount + i;
+            dst[i].groupId = size - leftCount + rightCount + i;
         }
         size += rightCount;
     }
@@ -242,7 +264,7 @@ namespace rv
             // Update entity ids
             for (int32_t i = 0; i < comprCount; i++)
             {
-                data[baseOffset + dstPos + i].id -= comprShifts;
+                data[baseOffset + dstPos + i].groupId -= comprShifts;
             }
         }
         size -= leftComprCount;
@@ -269,7 +291,7 @@ namespace rv
             // Update entity ids
             for (int32_t i = 0; i < comprCount; i++)
             {
-                data[baseOffset + comprShifts + i].id -= (comprShifts + leftComprCount);
+                data[baseOffset + comprShifts + i].groupId -= (comprShifts + leftComprCount);
             }
         }
         baseOffset += rightComprCount;
