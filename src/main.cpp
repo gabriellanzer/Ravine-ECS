@@ -25,8 +25,8 @@ int main(int argc, char** argv)
 const char* options = R"(
 Options:
 -> RETURN to STOP
--> UP to create new entity (Velocity=%f)
--> DOWN to remove last entity
+-> RIGHT to create new entity (Velocity=%f)
+-> LEFT to remove last entity
 -> Any other key to tick
 )";
 

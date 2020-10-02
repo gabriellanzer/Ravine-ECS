@@ -1,9 +1,19 @@
 # Ravine ECS
-This repository is the **Entity Component System** architecture implementation to be integrated with the [Ravine](https://github.com/gabriellanzer/Ravine) framework. It is written using C++14 features and has a special storage focused on linear cache access to ensure extreme performance. That is achieved through the concept of cyclic arrays, and done through a couple of control operations. The performance was validated through a benchmark against Skypjack's [EnTT](https://github.com/skypjack/entt) library, and it's repo can be found [here](https://github.com/gabriellanzer/Ravine-ECS-Benchmark) (TL;DR: got almost twice the iteration performance - but EnTT has many more features), I also did an [integration with OpenGL and a comparison of the DOD ECS vs Bad OOD](https://github.com/gabriellanzer/Ravine-ECS-Showdown) - sorry linux users, Visual Studio solutions only...
+This repository is the **Entity Component System** header-only architecture implementation to be integrated with the [Ravine](https://github.com/gabriellanzer/Ravine) framework. It is written using C++14 features and has a special storage focused on linear cache access to ensure extreme performance. That is achieved through the concept of cyclic arrays, and done through a couple of control operations. The performance was validated through a benchmark against Skypjack's [EnTT](https://github.com/skypjack/entt) library, and it's repo can be found [here](https://github.com/gabriellanzer/Ravine-ECS-Benchmark) (TL;DR: got almost twice the iteration performance - but EnTT has many more features), I also did an [integration with OpenGL and a comparison of the DOD ECS vs Bad OOD](https://github.com/gabriellanzer/Ravine-ECS-Showdown). Unfortunately, these projects are VS Solutions for now.
+
+## Build and Usage
+The library was design to be used as a headers-only library. Just copy the **src/ravine** folder to your **includes** project, and be sure to **use the 'rv' namespace**. The **ecs.h** file includes the the most usual dependencies for creating and using the architecture.
+
+The CMake project can be used to build the tests provided on the **main.cpp** file. Just comment-out the test you want to run on the main function. I tested the compilation with Clang LLVM (Windows and Linux) and VS2019 on Windows.
+
+Known issues:
+- There are known compilation errors with GCC. I don't really use it, so I haven't fixed those issues yet (fell free to open a PR - kind soul).
 
 ## How to use
 
-TODO - Document the general API usage. Code is mostly self-explanatory though... And the *main.cpp* shows an example. Besides that, the [OpenGL integration repo](https://github.com/gabriellanzer/Ravine-ECS-Showdown) is quite interesting in performance-wise operations (though very WIP).
+TODO - Document the general API usage. Code is mostly self-explanatory though...
+
+The *main.cpp* has a simple simulation tick example as well as a performance test. It uses components located in the **src/components** folder and systems on the **src/systems** one. Besides that, the [OpenGL integration repo](https://github.com/gabriellanzer/Ravine-ECS-Showdown) is a good example application (though in early WIP, don't curse too much O.o).
 
 ## Storage Scheme 
 To ensure the lowest cache-miss frequencies as possible, while mantaining a few nice features of linear access, I decided to have storage **arrays per component types**. Each of these arrays is holds groups of components, **ordered by their entities archetypes**. A given storage state is represented by the following diagram:

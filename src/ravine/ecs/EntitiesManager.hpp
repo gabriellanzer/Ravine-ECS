@@ -16,6 +16,11 @@ namespace rv
 
     class EntitiesManager
     {
+        /**
+         * @brief A base system of any type is a friend class and can use the internal functions.
+         * 
+         * @tparam TComponents Types of components.
+         */
         template <class... TComponents>
         friend class BaseSystem;
 
