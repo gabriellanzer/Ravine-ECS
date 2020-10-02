@@ -1,7 +1,7 @@
 # Ravine ECS
 This repository is the **Entity Component System** header-only architecture implementation to be integrated with the [Ravine](https://github.com/gabriellanzer/Ravine) framework. It is written using C++14 features and has a special storage focused on linear cache access to ensure extreme performance. That is achieved through the concept of cyclic arrays, and done through a couple of control operations. The performance was validated through a benchmark against Skypjack's [EnTT](https://github.com/skypjack/entt) library, and it's repo can be found [here](https://github.com/gabriellanzer/Ravine-ECS-Benchmark) (TL;DR: got almost twice the iteration performance - but EnTT has many more features), I also did an [integration with OpenGL and a comparison of the DOD ECS vs Bad OOD](https://github.com/gabriellanzer/Ravine-ECS-Showdown). Unfortunately, these projects are VS Solutions for now.
 
-## Build and Usage
+## Build and Integration
 The library was design to be used as a headers-only library. Just copy the **src/ravine** folder to your **includes** project, and be sure to **use the 'rv' namespace**. The **ecs.h** file includes the the most usual dependencies for creating and using the architecture.
 
 The CMake project can be used to build the tests provided on the **main.cpp** file. Just comment-out the test you want to run on the main function. I tested the compilation with Clang LLVM (Windows and Linux) and VS2019 on Windows.
@@ -9,7 +9,7 @@ The CMake project can be used to build the tests provided on the **main.cpp** fi
 Known issues:
 - There are known compilation errors with GCC. I don't really use it, so I haven't fixed those issues yet (fell free to open a PR - kind soul).
 
-## How to use
+## Usage
 
 TODO - Document the general API usage. Code is mostly self-explanatory though...
 
