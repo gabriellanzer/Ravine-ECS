@@ -334,5 +334,6 @@ ASALocalRun/
 # CMake Build directory
 build/
 
-# ClangD directory
+# ClangD directories
 .clangd/
+.cache/

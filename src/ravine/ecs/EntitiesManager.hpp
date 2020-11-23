@@ -7,6 +7,7 @@
 #include "TemplateMaskPack.h"
 #include <algorithm>
 #include <unordered_set>
+#include <queue>
 
 
 namespace rv
@@ -40,7 +41,13 @@ namespace rv
          * @brief Table of positions for unique entity id.
          * 
          */
-        static std::vector<Entity*> entitiesTable;
+        static std::vector<uint32_t> entitiesTable;
+
+        /**
+         * @brief Vacant positions queue on entity table entry.
+         * 
+         */
+        static std::queue<uint32_t> entTableVacancy;
 
       public:
         /**
@@ -171,7 +178,10 @@ namespace rv
     template <class... TComponents>
     inline Entity EntitiesManager::createEntity()
     {
-        return *createComponents<TComponents...>();
+        Entity* entity = createComponents<TComponents...>();
+        // entTableVacancy.pop()
+        // entity->id = ;
+        return *entity;
     }
 
     inline void EntitiesManager::removeEntity(Entity& entity)

@@ -79,7 +79,7 @@
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/",
   "cmake.copyCompileCommands": "${workspaceFolder}",
   "cmake.ctestPath": "",
-  "cmake.generator": "",
+  "cmake.generator": "Ninja",
   "cmake.installPrefix": "",
   "cmake.platform": "",
   "cmake.toolset": ""
