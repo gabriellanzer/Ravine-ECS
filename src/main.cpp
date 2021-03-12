@@ -1,11 +1,11 @@
 #include <chrono>
 #include <stack>
 
-#include "systems/ComflabulationSystem.hpp"
-#include "systems/EntityTestSystem.hpp"
-#include "systems/MovementSystem.hpp"
-#include "systems/GravitySystem.hpp"
-#include "systems/BoundarySystem.hpp"
+#include "Systems/ComflabulationSystem.hpp"
+#include "Systems/EntityTestSystem.hpp"
+#include "Systems/MovementSystem.hpp"
+#include "Systems/GravitySystem.hpp"
+#include "Systems/BoundarySystem.hpp"
 
 using std::stack;
 using namespace rv;
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 	entitiesTest();
 	//performanceTest();
 
-	return 0;
+    return 0;
 }
 
 const char* options = R"(

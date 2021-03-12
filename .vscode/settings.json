@@ -77,9 +77,9 @@
   },
   "cmake.configureOnOpen": true,
   "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}/",
-  "cmake.copyCompileCommands": "${workspaceFolder}",
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "cmake.ctestPath": "",
-  "cmake.generator": "",
+  "cmake.generator": "Ninja",
   "cmake.installPrefix": "",
   "cmake.platform": "",
   "cmake.toolset": ""

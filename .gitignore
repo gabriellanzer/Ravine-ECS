@@ -334,5 +334,12 @@ ASALocalRun/
 # CMake Build directory
 build/
 
-# ClangD directory
+# ClangD directories
 .clangd/
+.cache/
+
+# ImGUI perferences files
+imgui.ini
+
+# Compiel Commands is a System-specific file
+compile_commands.json
