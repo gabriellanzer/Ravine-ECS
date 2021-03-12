@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0)
 
 # Project Setup
-project(Ravine-ECS VERSION 0.1.5)
+project(Ravine-ECS VERSION 0.1.1)
 
 # Configure Conan
 include(${CMAKE_SOURCE_DIR}/build/conanbuildinfo_multi.cmake)
