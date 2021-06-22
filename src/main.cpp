@@ -1,13 +1,12 @@
 #include <chrono>
 #include <stack>
 
-#include "Systems/ComflabulationSystem.hpp"
-#include "Systems/EntityTestSystem.hpp"
-#include "Systems/MovementSystem.hpp"
-#include "Systems/GravitySystem.hpp"
-#include "Systems/BoundarySystem.hpp"
+#include "systems/BoundarySystem.hpp"
+#include "systems/ComflabulationSystem.hpp"
+#include "systems/EntityTestSystem.hpp"
+#include "systems/GravitySystem.hpp"
+#include "systems/MovementSystem.hpp"
 
-using std::stack;
 using namespace rv;
 
 // Tests Forward declaration
@@ -17,14 +16,16 @@ void performanceTest();
 int main(int argc, char** argv)
 {
 	entitiesTest();
-	//performanceTest();
+	// performanceTest();
 
-    return 0;
+	return 0;
 }
 
 const char* options = R"(
 Options:
 -> RETURN to STOP
+-> UP increase initial Velocity
+-> Down decrease initial Velocity
 -> RIGHT to create new entity (Velocity=%f)
 -> LEFT to remove last entity
 -> Any other key to tick
@@ -50,21 +51,22 @@ void entitiesTest()
 		fprintf(stdout, "\n");
 		fprintf(stdout, options, velocity);
 		char c = _getwch();
-		if(c == '\r') break;
-		if(c == 72) // Up Arrow
+		if (c == '\r')
+			break;
+		if (c == 72) // Up Arrow
 		{
 			velocity += 1.0f;
 		}
-		if(c == 80) // Down Arrow
+		if (c == 80) // Down Arrow
 		{
 			velocity -= 1.0f;
 		}
-		if(c == 77) // Right Arrow
+		if (c == 77) // Right Arrow
 		{
 			Entity entity = EntitiesManager::createEntity<Position, Velocity>({0, 1}, {0, velocity});
 			EntitiesManager::lateRemoveEntity(entity);
 		}
-		if(c == 75) // Left Arrow
+		if (c == 75) // Left Arrow
 		{
 			EntitiesManager::flushEntityOperations();
 		}
@@ -76,7 +78,7 @@ void performanceTest()
 	size_t entityCount = 10'000'000;
 	for (int32_t i = 0; i < entityCount; i++)
 	{
-		if (i < entityCount/2)
+		if (i < entityCount / 2)
 		{
 			EntitiesManager::createEntity<Velocity, Position>();
 		}

@@ -1,6 +1,7 @@
-#ifndef COMPONENTS_GROUP_HPP
-#define COMPONENTS_GROUP_HPP
+#ifndef ENTITY_GROUP_HPP
+#define ENTITY_GROUP_HPP
 
+#include "ComponentsGroup.hpp"
 #include "Entity.hpp"
 #include "FastMath.h"
 
@@ -9,10 +10,10 @@
 
 namespace rv
 {
-	template <class TComponent>
-	struct ComponentsGroup
+	template <>
+	struct ComponentsGroup<Entity>
 	{
-		TComponent* const& data;
+		Entity* const& data;
 		int32_t baseOffset = 0;
 		int32_t size = 0;
 		int32_t tipOffset = 0;
@@ -22,7 +23,7 @@ namespace rv
 		 *  and the group base offset position with respect to that array start.
 		 *
 		 */
-		constexpr ComponentsGroup(TComponent* const& storageData, const int32_t storageOffset)
+		constexpr ComponentsGroup(Entity* const& storageData, const int32_t storageOffset)
 		    : data(storageData), baseOffset(storageOffset)
 		{
 		}
@@ -33,14 +34,14 @@ namespace rv
 		 * @param comps Component data array to copy from.
 		 * @param count Amount of components in the array.
 		 */
-		inline void addComponent(const TComponent* comps, const uint32_t count);
+		inline void addComponent(const Entity* comps, const uint32_t count);
 
 		/**
 		 * @brief Adds a single component to this group.
 		 *
 		 * @param comp Component data to copy from.
 		 */
-		inline void addComponent(const TComponent& comp);
+		inline void addComponent(const Entity& comp);
 
 		/**
 		 * @brief Removes the given components based on their Ids.
@@ -55,16 +56,16 @@ namespace rv
 		 * @brief Get a pointer to the component that matches the given id.
 		 *
 		 * @param compId Id of the requested component.
-		 * @return TComponent* Pointer for the component address.
+		 * @return Entity* Pointer for the component address.
 		 */
-		inline TComponent* getComponent(const int32_t compId);
+		inline Entity* getComponent(const int32_t compId);
 
 		/**
 		 * @brief Returns the last components (before tip).
 		 *
-		 * @return TComponent* The last component.
+		 * @return Entity* The last component.
 		 */
-		inline TComponent* getLastComponent();
+		inline Entity* getLastComponent();
 
 		/**
 		 * @brief Rolls the components in a clockwise manner.
@@ -94,37 +95,38 @@ namespace rv
 		/**
 		 * @brief Usefull shortcut for accessing group start ptr.
 		 *
-		 * @return TComponent* Group start data position ptr.
+		 * @return Entity* Group start data position ptr.
 		 */
-		inline TComponent* dataPos();
-
-		// TODO: Implement Shift CounterClockwise
-		// TODO: Implement Swap of Components
-		// TODO: Implement InsertComponent (on a specific location)
+		inline Entity* dataPos();
 	};
 
-	template <class TComponent>
-	inline void ComponentsGroup<TComponent>::addComponent(const TComponent* comps, const uint32_t count)
+	inline void ComponentsGroup<Entity>::addComponent(const Entity* comps, const uint32_t count)
 	{
 		const int32_t missLeft = tipOffset - count;
 		const int32_t rightMask = signMask(missLeft);
 		const int32_t rightCount = rightMask * -missLeft;
 		const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
-		// Add components at group end
-		memcpy(dataPos() + size, comps + 0, rightCount * sizeof(TComponent));
-		// Add components before tip
-		memcpy(dataPos() + tipOffset - leftCount, comps + rightCount, leftCount * sizeof(TComponent));
+		Entity* dst = dataPos() + size;
+		memcpy(dst, comps + 0, rightCount * sizeof(Entity)); // Copy to the end of the group
+		for (int32_t i = 0; i < rightCount; i++)	     // Update Entity IDs
+		{
+			dst[i].groupId = size + i;
+		}
+		dst = dataPos() + tipOffset - leftCount;
+		memcpy(dst, comps + rightCount, leftCount * sizeof(Entity)); // Copy components to the left of the tip
+		for (int32_t i = 0; i < leftCount; i++)			     // Update Entity IDs
+		{
+			dst[i].groupId = size - leftCount + rightCount + i;
+		}
 		size += rightCount;
 	}
 
-	template <class TComponent>
-	inline void ComponentsGroup<TComponent>::addComponent(const TComponent& comp)
+	inline void ComponentsGroup<Entity>::addComponent(const Entity& comp)
 	{
 		addComponent(&comp, 1);
 	}
 
-	template <class TComponent>
-	inline int32_t ComponentsGroup<TComponent>::remComponent(const int32_t* compPos, const int32_t count)
+	inline int32_t ComponentsGroup<Entity>::remComponent(const int32_t* compPos, const int32_t count)
 	{
 		const int32_t rightSize = size - tipOffset;
 		int32_t leftComprCount = 0;
@@ -143,7 +145,6 @@ namespace rv
 		{
 			const int32_t cId = i;
 			const int32_t comprPos = compPos[cId];
-
 			// Calculate compression shifts
 			int32_t comprShifts = 1;
 			for (int32_t j = cId - 1; j >= 0; j--)
@@ -157,17 +158,19 @@ namespace rv
 				comprShifts++; // Increase shift count
 				i--;	       // Can skip next compression
 			}
-
 			// Actual position of the component without wrapping
 			const int32_t actualPos = tipOffset + comprPos;
-
 			// Calculate amount of elements to be compressed left
 			const int32_t comprCount = size - actualPos - 1;
-
 			// Perform compression by moving memory blocks
 			const int32_t srcPos = actualPos + 1;
 			const int32_t dstPos = srcPos - comprShifts;
-			memmove(dataPos() + dstPos, dataPos() + srcPos, comprCount * sizeof(TComponent));
+			memmove(dataPos() + dstPos, dataPos() + srcPos, comprCount * sizeof(Entity));
+			// Update entity ids
+			for (int32_t i = 0; i < comprCount; i++)
+			{
+				data[baseOffset + dstPos + i].groupId -= comprShifts;
+			}
 		}
 		size -= leftComprCount;
 
@@ -176,7 +179,6 @@ namespace rv
 		{
 			const int32_t cId = i;
 			const int32_t comprPos = compPos[cId];
-
 			// Calculate compression shifts
 			int32_t comprShifts = 1;
 			for (int32_t j = cId + 1; j < count; j++)
@@ -190,12 +192,15 @@ namespace rv
 				comprShifts++; // Increase shift count
 				i++;	       // Can skip next compression
 			}
-
 			// Calculate amount of elements to be compressed right
 			const int32_t comprCount = comprPos - rightSize;
-
 			// Perform compression by moving memory blocks
-			memmove(dataPos() + comprShifts, dataPos(), comprCount * sizeof(TComponent));
+			memmove(dataPos() + comprShifts, dataPos(), comprCount * sizeof(Entity));
+			// Update entity ids
+			for (int32_t i = 0; i < comprCount; i++)
+			{
+				data[baseOffset + comprShifts + i].groupId -= (comprShifts + leftComprCount);
+			}
 		}
 		baseOffset += rightComprCount;
 		tipOffset -= rightComprCount;
@@ -207,24 +212,21 @@ namespace rv
 		return leftComprCount;
 	}
 
-	template <class TComponent>
-	inline TComponent* ComponentsGroup<TComponent>::getComponent(const int32_t compId)
+	inline Entity* ComponentsGroup<Entity>::getComponent(const int32_t compId)
 	{
 		return dataPos() + (tipOffset + compId) % size;
 	}
 
-	template <class TComponent>
-	inline TComponent* ComponentsGroup<TComponent>::getLastComponent()
+	inline Entity* ComponentsGroup<Entity>::getLastComponent()
 	{
 		return getComponent(size - 1);
 	}
 
-	template <class TComponent>
-	inline void ComponentsGroup<TComponent>::rollClockwise(const int32_t count)
+	inline void ComponentsGroup<Entity>::rollClockwise(const int32_t count)
 	{
 		const int32_t toCopy = min(size, count);
 		const int32_t stride = max(size, count);
-		memcpy(dataPos() + stride, dataPos(), toCopy * sizeof(TComponent)); // Roll data
+		memcpy(dataPos() + stride, dataPos(), toCopy * sizeof(Entity)); // Roll data
 		tipOffset -= toCopy;						    // Decrease tipOffset
 		tipOffset += signMask(tipOffset) * size;			    // Wrap around
 
@@ -232,79 +234,35 @@ namespace rv
 		baseOffset += count;
 	}
 
-	template <class TComponent>
-	inline void ComponentsGroup<TComponent>::rollCounterClockwise(const int32_t count)
+	inline void ComponentsGroup<Entity>::rollCounterClockwise(const int32_t count)
 	{
 		const int32_t dstOffset = min(baseOffset, count);
 		const int32_t toCopy = min(dstOffset, size);
 		const int32_t srcPos = size - toCopy;
-		TComponent* dst = dataPos() - dstOffset;
-		TComponent* src = dataPos() + srcPos;
-		memcpy(dst, src, toCopy * sizeof(TComponent));	    // Roll data
+		Entity* dst = dataPos() - dstOffset;
+		Entity* src = dataPos() + srcPos;
+		memcpy(dst, src, toCopy * sizeof(Entity));	    // Roll data
 		tipOffset += toCopy;				    // Increase tipOffset
 		tipOffset -= signMask(size - tipOffset - 1) * size; // Wrap around
 		baseOffset -= toCopy;				    // Decrease base ptr
 	}
 
-	template <class TComponent>
-	inline int32_t ComponentsGroup<TComponent>::shiftClockwise(int32_t count)
+	inline int32_t ComponentsGroup<Entity>::shiftClockwise(int32_t count)
 	{
 		count = min(count, tipOffset);
 		const int32_t mask = signMask(count - tipOffset - 1);
 		const int32_t shiftCount = (tipOffset - count) * mask;
 		const int32_t rollCount = count * mask;
-		memcpy(dataPos() + size, dataPos(), rollCount * sizeof(TComponent));	   // Roll data
-		memcpy(dataPos(), dataPos() + rollCount, shiftCount * sizeof(TComponent)); // Shift data
+		memcpy(dataPos() + size, dataPos(), rollCount * sizeof(Entity));	   // Roll data
+		memcpy(dataPos(), dataPos() + rollCount, shiftCount * sizeof(Entity)); // Shift data
 		size += count; // Increases size to update end of array
 		return count;  // Returns how many slots left before tip
 	}
 
-	template <class TComponent>
-	TComponent* ComponentsGroup<TComponent>::dataPos()
+	Entity* ComponentsGroup<Entity>::dataPos()
 	{
 		return data + baseOffset;
 	}
-
-	/**
-	 * @brief Struct that represents the hash of component types.
-	 */
-	struct GroupMask
-	{
-		/**
-		 * @brief Hash of all pointer types this mask represents.
-		 */
-		intptr_t typePtr;
-		/**
-		 * @brief Amount of types this mask represents.
-		 */
-		int32_t typesCount;
-
-		inline GroupMask(const intptr_t* masks, const int32_t count) : typePtr(0), typesCount(count)
-		{
-			for (size_t i = 0; i < typesCount; i++)
-			{
-				typePtr += masks[i];
-			}
-		}
-	};
-
-	/**
-	 * @brief Group Mask Compare operation.
-	 */
-	struct GroupMaskCmp
-	{
-		inline bool operator()(const GroupMask& a, const GroupMask& b) const
-		{
-			if (a.typesCount != b.typesCount)
-			{
-				return a.typesCount > b.typesCount;
-			}
-			else
-			{
-				return a.typePtr < b.typePtr;
-			}
-		}
-	};
 
 } // namespace rv
 
