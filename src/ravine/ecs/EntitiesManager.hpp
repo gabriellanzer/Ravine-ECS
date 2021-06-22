@@ -5,6 +5,7 @@
 #include "ComponentsGroup.hpp"
 #include "Entity.hpp"
 #include "TemplateMaskPack.h"
+
 #include <algorithm>
 #include <queue>
 #include <unordered_set>
@@ -111,8 +112,8 @@ namespace rv
 	};
 
 	// Static Definitions
-	GroupIdList EntitiesManager::entIdToDestroy;
-	std::unordered_set<IComponentStorage*> EntitiesManager::storagesToDestroy;
+	inline GroupIdList EntitiesManager::entIdToDestroy;
+	inline std::unordered_set<IComponentStorage*> EntitiesManager::storagesToDestroy;
 
 	template <class... TComponents>
 	constexpr MaskArray<sizeof...(TComponents)> EntitiesManager::getMaskArray()
@@ -145,12 +146,12 @@ namespace rv
 	template <class... TComponents>
 	inline Entity* EntitiesManager::createComponents(TComponents... args)
 	{
-		using expander = int[];
 		MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<Entity, TComponents...>();
 		Entity* entity = createComponent<Entity, Entity, TComponents...>(masks);
 		entity->compTypes = new intptr_t[sizeof...(TComponents) + 1];
 		memcpy(entity->compTypes, masks.data(), (sizeof...(TComponents) + 1) * sizeof(intptr_t));
 		entity->typesCount = sizeof...(TComponents) + 1;
+		using expander = int[];
 		expander{0, ((void)(createComponent<TComponents, Entity, TComponents...>(masks, args)), 0)...};
 		return entity;
 	}
@@ -158,12 +159,12 @@ namespace rv
 	template <class... TComponents>
 	inline Entity* EntitiesManager::createComponents()
 	{
-		using expander = int[];
 		MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<Entity, TComponents...>();
 		Entity* entity = createComponent<Entity, Entity, TComponents...>(masks);
 		entity->compTypes = new intptr_t[sizeof...(TComponents) + 1];
 		memcpy(entity->compTypes, masks.data(), (sizeof...(TComponents) + 1) * sizeof(intptr_t));
 		entity->typesCount = sizeof...(TComponents) + 1;
+		using expander = int[];
 		expander{0, ((void)(createComponent<TComponents, Entity, TComponents...>(masks)), 0)...};
 		return entity;
 	}
@@ -221,8 +222,8 @@ namespace rv
 			entIdToDestroy.insert(it, GroupIdPair(typeMask, groupIds));
 		}
 
-		// Add entity to remove group
-		groupIds->push_back(entity.id);
+		// Add entity group id to remove group
+		groupIds->push_back(entity.groupId);
 
 		// Set as invalid
 		entity.id = -1;

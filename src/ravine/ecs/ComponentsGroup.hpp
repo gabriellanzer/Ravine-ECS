@@ -1,11 +1,11 @@
 #ifndef COMPONENTS_GROUP_HPP
 #define COMPONENTS_GROUP_HPP
 
-#include <cstdlib>
-#include <string>
-
 #include "Entity.hpp"
 #include "FastMath.h"
+
+#include <cstdlib>
+#include <string>
 
 namespace rv
 {
@@ -146,7 +146,7 @@ namespace rv
 	}
 
 	template <class TComponent>
-	inline int32_t ComponentsGroup<TComponent>::remComponent(const int32_t* compIds, const int32_t count)
+	inline int32_t ComponentsGroup<TComponent>::remComponent(const int32_t* compPos, const int32_t count)
 	{
 		const int32_t rightSize = size - tipOffset;
 		int32_t leftComprCount = 0;
@@ -154,7 +154,7 @@ namespace rv
 		// Count the number of left compressions
 		for (int32_t i = 0; i < count; i++)
 		{
-			leftComprCount += signMask(compIds[i] - rightSize);
+			leftComprCount += signMask(compPos[i] - rightSize);
 		}
 
 		// Count the number of right compressions
@@ -164,17 +164,20 @@ namespace rv
 		for (int32_t i = leftComprCount - 1; i >= 0; i--)
 		{
 			const int32_t cId = i;
-			const int32_t comprPos = compIds[cId];
+			const int32_t comprPos = compPos[cId];
 
 			// Calculate compression shifts
 			int32_t comprShifts = 1;
 			for (int32_t j = cId - 1; j >= 0; j--)
 			{
-				const int32_t nextComprPos = compIds[cId - comprShifts];
+				const int32_t nextComprPos = compPos[cId - comprShifts];
 				const int32_t fetchLimit = comprPos - comprShifts - 1;
-				const int32_t incMask = signMask(fetchLimit - nextComprPos);
-				comprShifts += incMask; // Increase shift count
-				i -= incMask;		// Can skip next compression
+				if (signMask(fetchLimit - nextComprPos) == 0)
+				{
+					break;
+				}
+				comprShifts++; // Increase shift count
+				i--;	       // Can skip next compression
 			}
 
 			// Actual position of the component without wrapping
@@ -194,17 +197,20 @@ namespace rv
 		for (int32_t i = leftComprCount; i < count; i++)
 		{
 			const int32_t cId = i;
-			const int32_t comprPos = compIds[cId];
+			const int32_t comprPos = compPos[cId];
 
 			// Calculate compression shifts
 			int32_t comprShifts = 1;
 			for (int32_t j = cId + 1; j < count; j++)
 			{
-				const int32_t nextComprPos = compIds[cId + comprShifts];
+				const int32_t nextComprPos = compPos[cId + comprShifts];
 				const int32_t fetchLimit = comprPos + comprShifts + 1;
-				const int32_t incMask = signMask(nextComprPos - fetchLimit);
-				comprShifts += incMask; // Increase shift count
-				i += incMask;		// Can skip next compression
+				if (signMask(nextComprPos - fetchLimit) == 0)
+				{
+					break;
+				}
+				comprShifts++; // Increase shift count
+				i++;	       // Can skip next compression
 			}
 
 			// Calculate amount of elements to be compressed right
@@ -224,7 +230,7 @@ namespace rv
 	}
 
 	template <>
-	inline int32_t ComponentsGroup<Entity>::remComponent(const int32_t* compIds, const int32_t count)
+	inline int32_t ComponentsGroup<Entity>::remComponent(const int32_t* compPos, const int32_t count)
 	{
 		const int32_t rightSize = size - tipOffset;
 		int32_t leftComprCount = 0;
@@ -232,7 +238,7 @@ namespace rv
 		// Count the number of left compressions
 		for (int32_t i = 0; i < count; i++)
 		{
-			leftComprCount += signMask(compIds[i] - rightSize);
+			leftComprCount += signMask(compPos[i] - rightSize);
 		}
 
 		// Count the number of right compressions
@@ -242,16 +248,19 @@ namespace rv
 		for (int32_t i = leftComprCount - 1; i >= 0; i--)
 		{
 			const int32_t cId = i;
-			const int32_t comprPos = compIds[cId];
+			const int32_t comprPos = compPos[cId];
 			// Calculate compression shifts
 			int32_t comprShifts = 1;
 			for (int32_t j = cId - 1; j >= 0; j--)
 			{
-				const int32_t nextComprPos = compIds[cId - comprShifts];
+				const int32_t nextComprPos = compPos[cId - comprShifts];
 				const int32_t fetchLimit = comprPos - comprShifts - 1;
-				const int32_t incMask = signMask(fetchLimit - nextComprPos);
-				comprShifts += incMask; // Increase shift count
-				i -= incMask;		// Can skip next compression
+				if (signMask(fetchLimit - nextComprPos) == 0)
+				{
+					break;
+				}
+				comprShifts++; // Increase shift count
+				i--;	       // Can skip next compression
 			}
 			// Actual position of the component without wrapping
 			const int32_t actualPos = tipOffset + comprPos;
@@ -273,16 +282,19 @@ namespace rv
 		for (int32_t i = leftComprCount; i < count; i++)
 		{
 			const int32_t cId = i;
-			const int32_t comprPos = compIds[cId];
+			const int32_t comprPos = compPos[cId];
 			// Calculate compression shifts
 			int32_t comprShifts = 1;
 			for (int32_t j = cId + 1; j < count; j++)
 			{
-				const int32_t nextComprPos = compIds[cId + comprShifts];
+				const int32_t nextComprPos = compPos[cId + comprShifts];
 				const int32_t fetchLimit = comprPos + comprShifts + 1;
-				const int32_t incMask = signMask(nextComprPos - fetchLimit);
-				comprShifts += incMask; // Increase shift count
-				i += incMask;		// Can skip next compression
+				if (signMask(nextComprPos - fetchLimit) == 0)
+				{
+					break;
+				}
+				comprShifts++; // Increase shift count
+				i++;	       // Can skip next compression
 			}
 			// Calculate amount of elements to be compressed right
 			const int32_t comprCount = comprPos - rightSize;

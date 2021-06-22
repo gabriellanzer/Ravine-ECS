@@ -7,7 +7,7 @@
 
 namespace rv
 {
-	typedef int32_t EntityId;
+	typedef uint32_t EntityId;
 
 	struct Entity
 	{
