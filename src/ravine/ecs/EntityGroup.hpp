@@ -103,9 +103,14 @@ namespace rv
 	inline void ComponentsGroup<Entity>::addComponent(const Entity* comps, const uint32_t count)
 	{
 		const int32_t missLeft = tipOffset - count;
+		// If there is any missing slots left of the tip
 		const int32_t rightMask = signMask(missLeft);
+		// Right count is how much it is missing at left of the tip
 		const int32_t rightCount = rightMask * -missLeft;
+		// Left count is either the whole space until the tip or the count of comps
+		// (when there is no missing slots left of the tip)
 		const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
+		
 		Entity* dst = dataPos() + size;
 		memcpy(dst, comps + 0, rightCount * sizeof(Entity)); // Copy to the end of the group
 		for (int32_t i = 0; i < rightCount; i++)	     // Update Entity IDs
@@ -121,10 +126,7 @@ namespace rv
 		size += rightCount;
 	}
 
-	inline void ComponentsGroup<Entity>::addComponent(const Entity& comp)
-	{
-		addComponent(&comp, 1);
-	}
+	inline void ComponentsGroup<Entity>::addComponent(const Entity& comp) { addComponent(&comp, 1); }
 
 	inline int32_t ComponentsGroup<Entity>::remComponent(const int32_t* compPos, const int32_t count)
 	{
@@ -217,18 +219,15 @@ namespace rv
 		return dataPos() + (tipOffset + compId) % size;
 	}
 
-	inline Entity* ComponentsGroup<Entity>::getLastComponent()
-	{
-		return getComponent(size - 1);
-	}
+	inline Entity* ComponentsGroup<Entity>::getLastComponent() { return getComponent(size - 1); }
 
 	inline void ComponentsGroup<Entity>::rollClockwise(const int32_t count)
 	{
 		const int32_t toCopy = min(size, count);
 		const int32_t stride = max(size, count);
 		memcpy(dataPos() + stride, dataPos(), toCopy * sizeof(Entity)); // Roll data
-		tipOffset -= toCopy;						    // Decrease tipOffset
-		tipOffset += signMask(tipOffset) * size;			    // Wrap around
+		tipOffset -= toCopy;						// Decrease tipOffset
+		tipOffset += signMask(tipOffset) * size;			// Wrap around
 
 		// Should Increase base ptr
 		baseOffset += count;
@@ -253,16 +252,13 @@ namespace rv
 		const int32_t mask = signMask(count - tipOffset - 1);
 		const int32_t shiftCount = (tipOffset - count) * mask;
 		const int32_t rollCount = count * mask;
-		memcpy(dataPos() + size, dataPos(), rollCount * sizeof(Entity));	   // Roll data
+		memcpy(dataPos() + size, dataPos(), rollCount * sizeof(Entity));       // Roll data
 		memcpy(dataPos(), dataPos() + rollCount, shiftCount * sizeof(Entity)); // Shift data
 		size += count; // Increases size to update end of array
 		return count;  // Returns how many slots left before tip
 	}
 
-	Entity* ComponentsGroup<Entity>::dataPos()
-	{
-		return data + baseOffset;
-	}
+	Entity* ComponentsGroup<Entity>::dataPos() { return data + baseOffset; }
 
 } // namespace rv
 

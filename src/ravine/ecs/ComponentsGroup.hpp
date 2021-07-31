@@ -107,9 +107,14 @@ namespace rv
 	inline void ComponentsGroup<TComponent>::addComponent(const TComponent* comps, const uint32_t count)
 	{
 		const int32_t missLeft = tipOffset - count;
+		// If there is any missing slots left of the tip
 		const int32_t rightMask = signMask(missLeft);
+		// Right count is how much it is missing at left of the tip
 		const int32_t rightCount = rightMask * -missLeft;
+		// Left count is either the whole space until the tip or the count of comps
+		// (when there is no missing slots left of the tip)
 		const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
+		
 		// Add components at group end
 		memcpy(dataPos() + size, comps + 0, rightCount * sizeof(TComponent));
 		// Add components before tip

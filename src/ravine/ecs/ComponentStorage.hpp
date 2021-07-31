@@ -231,7 +231,7 @@ namespace rv
 			// Look for registry entry
 			GroupsRegIt regIt = groupsRegistry.lower_bound(mask);
 
-			// If no registry entry exists
+			// Check if a registry entry exists
 			if (regIt != groupsRegistry.end() && !(groupsRegistry.key_comp()(mask, regIt->first)))
 			{
 				return regIt;
@@ -278,23 +278,20 @@ namespace rv
 			{
 				GroupIt<TComp> it = nextIt;
 				_ASSERT(it != groups.end());
+
 				// Remove Component from specific group
 				std::vector<int>* entityIds = beg->second;
 				int32_t roll = (*it->second).remComponent(entityIds->data(), entityIds->size());
+				
 				// Fill-in the gaps for the group whose components have been removed
 				(*it->second).rollCounterClockwise(accRoll);
 				accRoll += roll; // Accumulate the gaps for multiple groups removal
+				
 				// Get next group mask
 				beg++;
 				// And get next group it
-				if (beg == groupIdList.end())
-				{
-					nextIt = groups.end();
-				}
-				else
-				{
-					nextIt = groups.find(beg->first);
-				}
+				nextIt = (beg == groupIdList.end()) ? groups.end() : groups.find(beg->first);
+
 				// Roll all effected groups to fill the gap (until next group removal)
 				for (it++; it != nextIt; it++)
 				{
