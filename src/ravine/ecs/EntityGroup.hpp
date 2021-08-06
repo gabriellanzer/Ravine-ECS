@@ -7,23 +7,35 @@
 
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 namespace rv
 {
+	struct EntityLookup
+	{
+		uint32_t entityId;
+		int32_t groupPos;
+
+		inline bool operator<(const EntityLookup& other) { return entityId < other.entityId; }
+	};
+
 	template <>
 	struct ComponentsGroup<Entity>
 	{
+		using LookupList = std::vector<EntityLookup>;
+
 		Entity* const& data;
 		int32_t baseOffset = 0;
 		int32_t size = 0;
 		int32_t tipOffset = 0;
+		LookupList lookupBuffer;
 
 		/**
 		 * @brief Constructs a group from a storage data array pointer reference
 		 *  and the group base offset position with respect to that array start.
 		 *
 		 */
-		constexpr ComponentsGroup(Entity* const& storageData, const int32_t storageOffset)
+		ComponentsGroup(Entity* const& storageData, const int32_t storageOffset)
 		    : data(storageData), baseOffset(storageOffset)
 		{
 		}
@@ -98,6 +110,12 @@ namespace rv
 		 * @return Entity* Group start data position ptr.
 		 */
 		inline Entity* dataPos();
+
+		/**
+		 * @brief Cleanup the buffer for a new pass.
+		 *
+		 */
+		inline void flushLookupBuffer();
 	};
 
 	inline void ComponentsGroup<Entity>::addComponent(const Entity* comps, const uint32_t count)
@@ -110,18 +128,26 @@ namespace rv
 		// Left count is either the whole space until the tip or the count of comps
 		// (when there is no missing slots left of the tip)
 		const int32_t leftCount = rightMask * tipOffset + (1 - rightMask) * count;
-		
+
+		// Pre-allocate lookup buffer
+		lookupBuffer.reserve(lookupBuffer.size() + rightCount + leftCount);
+
+		// Copy new components to their correct spots
 		Entity* dst = dataPos() + size;
 		memcpy(dst, comps + 0, rightCount * sizeof(Entity)); // Copy to the end of the group
 		for (int32_t i = 0; i < rightCount; i++)	     // Update Entity IDs
 		{
-			dst[i].groupId = size + i;
+			Entity& entity = dst[i];
+			entity.groupId = size + i;
+			lookupBuffer.push_back({entity.id, entity.groupId});
 		}
 		dst = dataPos() + tipOffset - leftCount;
 		memcpy(dst, comps + rightCount, leftCount * sizeof(Entity)); // Copy components to the left of the tip
 		for (int32_t i = 0; i < leftCount; i++)			     // Update Entity IDs
 		{
-			dst[i].groupId = size - leftCount + rightCount + i;
+			Entity& entity = dst[i];
+			entity.groupId = size - leftCount + rightCount + i;
+			lookupBuffer.push_back({entity.id, entity.groupId});
 		}
 		size += rightCount;
 	}
@@ -168,10 +194,14 @@ namespace rv
 			const int32_t srcPos = actualPos + 1;
 			const int32_t dstPos = srcPos - comprShifts;
 			memmove(dataPos() + dstPos, dataPos() + srcPos, comprCount * sizeof(Entity));
+
 			// Update entity ids
+			lookupBuffer.reserve(lookupBuffer.size() + comprCount);
 			for (int32_t i = 0; i < comprCount; i++)
 			{
-				data[baseOffset + dstPos + i].groupId -= comprShifts;
+				Entity& entity = data[baseOffset + dstPos + i];
+				entity.groupId -= comprShifts;
+				lookupBuffer.push_back({entity.id, entity.groupId});
 			}
 		}
 		size -= leftComprCount;
@@ -198,10 +228,14 @@ namespace rv
 			const int32_t comprCount = comprPos - rightSize;
 			// Perform compression by moving memory blocks
 			memmove(dataPos() + comprShifts, dataPos(), comprCount * sizeof(Entity));
+
 			// Update entity ids
+			lookupBuffer.reserve(lookupBuffer.size() + comprCount);
 			for (int32_t i = 0; i < comprCount; i++)
 			{
-				data[baseOffset + comprShifts + i].groupId -= (comprShifts + leftComprCount);
+				Entity& entity = data[baseOffset + comprShifts + i];
+				entity.groupId -= (comprShifts + leftComprCount);
+				lookupBuffer.push_back({entity.id, entity.groupId});
 			}
 		}
 		baseOffset += rightComprCount;
@@ -258,7 +292,9 @@ namespace rv
 		return count;  // Returns how many slots left before tip
 	}
 
-	Entity* ComponentsGroup<Entity>::dataPos() { return data + baseOffset; }
+	inline Entity* ComponentsGroup<Entity>::dataPos() { return data + baseOffset; }
+
+	inline void ComponentsGroup<Entity>::flushLookupBuffer() { lookupBuffer.empty(); }
 
 } // namespace rv
 
