@@ -1,7 +1,7 @@
 #ifndef BASESYSTEM_HPP
 #define BASESYSTEM_HPP
 
-#include "EntitiesManager.hpp"
+#include "EntityRegistry.hpp"
 #include "ISystem.h"
 #include "TemplateIndexPack.h"
 
@@ -91,7 +91,7 @@ namespace rv
 		void update(double deltaTime) final
 		{
 			// Get Updated List of Iterators
-			compGroupIts = EntitiesManager::getComponentIterators<TComps...>();
+			compGroupIts = EntityRegistry::getComponentIterators<TComps...>();
 			updateUnfold(deltaTime, typename gens<sizeof...(TComps)>::type());
 		}
 

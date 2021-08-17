@@ -63,12 +63,12 @@ void entitiesTest()
 		}
 		if (c == 77) // Right Arrow
 		{
-			Entity entity = EntitiesManager::createEntity<Position, Velocity>({0, 1}, {0, velocity});
-			EntitiesManager::lateRemoveEntity(entity);
+			Entity entity = EntityRegistry::createEntity<Position, Velocity>({0, 1}, {0, velocity});
+			EntityRegistry::lateRemoveEntity(entity);
 		}
 		if (c == 75) // Left Arrow
 		{
-			EntitiesManager::flushEntityOperations();
+			EntityRegistry::flushEntityOperations();
 		}
 	}
 }
@@ -80,11 +80,11 @@ void performanceTest()
 	{
 		if (i < entityCount / 2)
 		{
-			EntitiesManager::createEntity<Velocity, Position>();
+			EntityRegistry::createEntity<Velocity, Position>();
 		}
 		else
 		{
-			EntitiesManager::createEntity<Velocity, Position, Comflabulation>();
+			EntityRegistry::createEntity<Velocity, Position, Comflabulation>();
 		}
 
 		if (i % 1000 == 0)

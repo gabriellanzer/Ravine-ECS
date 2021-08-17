@@ -6,6 +6,7 @@
 #include "FastMath.h"
 
 #include <cstdlib>
+#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -20,11 +21,11 @@ namespace rv
 	};
 
 	template <>
-	struct ComponentsGroup<Entity>
+	struct ComponentsGroup<EntityProxy>
 	{
 		using LookupList = std::vector<EntityLookup>;
 
-		Entity* const& data;
+		EntityProxy* const& data;
 		int32_t baseOffset = 0;
 		int32_t size = 0;
 		int32_t tipOffset = 0;
@@ -35,7 +36,7 @@ namespace rv
 		 *  and the group base offset position with respect to that array start.
 		 *
 		 */
-		ComponentsGroup(Entity* const& storageData, const int32_t storageOffset)
+		ComponentsGroup(EntityProxy* const& storageData, const int32_t storageOffset)
 		    : data(storageData), baseOffset(storageOffset)
 		{
 		}
@@ -46,14 +47,14 @@ namespace rv
 		 * @param comps Component data array to copy from.
 		 * @param count Amount of components in the array.
 		 */
-		inline void addComponent(const Entity* comps, const uint32_t count);
+		inline void addComponent(const EntityProxy* comps, const uint32_t count);
 
 		/**
 		 * @brief Adds a single component to this group.
 		 *
 		 * @param comp Component data to copy from.
 		 */
-		inline void addComponent(const Entity& comp);
+		inline void addComponent(const EntityProxy& comp);
 
 		/**
 		 * @brief Removes the given components based on their Ids.
@@ -68,16 +69,16 @@ namespace rv
 		 * @brief Get a pointer to the component that matches the given id.
 		 *
 		 * @param compId Id of the requested component.
-		 * @return Entity* Pointer for the component address.
+		 * @return EntityProxy* Pointer for the component address.
 		 */
-		inline Entity* getComponent(const int32_t compId);
+		inline EntityProxy* getComponent(const int32_t compId);
 
 		/**
 		 * @brief Returns the last components (before tip).
 		 *
-		 * @return Entity* The last component.
+		 * @return EntityProxy* The last component.
 		 */
-		inline Entity* getLastComponent();
+		inline EntityProxy* getLastComponent();
 
 		/**
 		 * @brief Rolls the components in a clockwise manner.
@@ -107,9 +108,9 @@ namespace rv
 		/**
 		 * @brief Usefull shortcut for accessing group start ptr.
 		 *
-		 * @return Entity* Group start data position ptr.
+		 * @return EntityProxy* Group start data position ptr.
 		 */
-		inline Entity* dataPos();
+		inline EntityProxy* dataPos();
 
 		/**
 		 * @brief Cleanup the buffer for a new pass.
@@ -118,7 +119,7 @@ namespace rv
 		inline void flushLookupBuffer();
 	};
 
-	inline void ComponentsGroup<Entity>::addComponent(const Entity* comps, const uint32_t count)
+	inline void ComponentsGroup<EntityProxy>::addComponent(const EntityProxy* comps, const uint32_t count)
 	{
 		const int32_t missLeft = tipOffset - count;
 		// If there is any missing slots left of the tip
@@ -133,28 +134,41 @@ namespace rv
 		lookupBuffer.reserve(lookupBuffer.size() + rightCount + leftCount);
 
 		// Copy new components to their correct spots
-		Entity* dst = dataPos() + size;
-		memcpy(dst, comps + 0, rightCount * sizeof(Entity)); // Copy to the end of the group
-		for (int32_t i = 0; i < rightCount; i++)	     // Update Entity IDs
+		EntityProxy* dst = dataPos() + size;
+		memcpy(dst, comps + 0, rightCount * sizeof(EntityProxy)); // Copy to the end of the group
+		for (int32_t i = 0; i < rightCount; i++)		  // Update EntityProxy IDs
 		{
-			Entity& entity = dst[i];
+			EntityProxy& entity = dst[i];
 			entity.groupId = size + i;
-			lookupBuffer.push_back({entity.id, entity.groupId});
+
+			// TODO: Check if we can keep track only of entities the user wants to
+			// Pay for what you use
+			// if (entity.IsTracked())
+			{
+				lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+			}
 		}
 		dst = dataPos() + tipOffset - leftCount;
-		memcpy(dst, comps + rightCount, leftCount * sizeof(Entity)); // Copy components to the left of the tip
-		for (int32_t i = 0; i < leftCount; i++)			     // Update Entity IDs
+		memcpy(dst, comps + rightCount,
+		       leftCount * sizeof(EntityProxy)); // Copy components to the left of the tip
+		for (int32_t i = 0; i < leftCount; i++)	 // Update EntityProxy IDs
 		{
-			Entity& entity = dst[i];
+			EntityProxy& entity = dst[i];
 			entity.groupId = size - leftCount + rightCount + i;
-			lookupBuffer.push_back({entity.id, entity.groupId});
+
+			// TODO: Check if we can keep track only of entities the user wants to
+			// Pay for what you use
+			// if (entity.IsTracked())
+			{
+				lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+			}
 		}
 		size += rightCount;
 	}
 
-	inline void ComponentsGroup<Entity>::addComponent(const Entity& comp) { addComponent(&comp, 1); }
+	inline void ComponentsGroup<EntityProxy>::addComponent(const EntityProxy& comp) { addComponent(&comp, 1); }
 
-	inline int32_t ComponentsGroup<Entity>::remComponent(const int32_t* compPos, const int32_t count)
+	inline int32_t ComponentsGroup<EntityProxy>::remComponent(const int32_t* compPos, const int32_t count)
 	{
 		const int32_t rightSize = size - tipOffset;
 		int32_t leftComprCount = 0;
@@ -193,15 +207,21 @@ namespace rv
 			// Perform compression by moving memory blocks
 			const int32_t srcPos = actualPos + 1;
 			const int32_t dstPos = srcPos - comprShifts;
-			memmove(dataPos() + dstPos, dataPos() + srcPos, comprCount * sizeof(Entity));
+			memmove(dataPos() + dstPos, dataPos() + srcPos, comprCount * sizeof(EntityProxy));
 
 			// Update entity ids
 			lookupBuffer.reserve(lookupBuffer.size() + comprCount);
 			for (int32_t i = 0; i < comprCount; i++)
 			{
-				Entity& entity = data[baseOffset + dstPos + i];
+				EntityProxy& entity = data[baseOffset + dstPos + i];
 				entity.groupId -= comprShifts;
-				lookupBuffer.push_back({entity.id, entity.groupId});
+
+				// TODO: Check if we can keep track only of entities the user wants to
+				// Pay for what you use
+				// if (entity.IsTracked())
+				{
+					lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+				}
 			}
 		}
 		size -= leftComprCount;
@@ -227,15 +247,21 @@ namespace rv
 			// Calculate amount of elements to be compressed right
 			const int32_t comprCount = comprPos - rightSize;
 			// Perform compression by moving memory blocks
-			memmove(dataPos() + comprShifts, dataPos(), comprCount * sizeof(Entity));
+			memmove(dataPos() + comprShifts, dataPos(), comprCount * sizeof(EntityProxy));
 
 			// Update entity ids
 			lookupBuffer.reserve(lookupBuffer.size() + comprCount);
 			for (int32_t i = 0; i < comprCount; i++)
 			{
-				Entity& entity = data[baseOffset + comprShifts + i];
+				EntityProxy& entity = data[baseOffset + comprShifts + i];
 				entity.groupId -= (comprShifts + leftComprCount);
-				lookupBuffer.push_back({entity.id, entity.groupId});
+
+				// TODO: Check if we can keep track only of entities the user wants to
+				// Pay for what you use
+				// if (entity.IsTracked())
+				{
+					lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+				}
 			}
 		}
 		baseOffset += rightComprCount;
@@ -248,53 +274,53 @@ namespace rv
 		return leftComprCount;
 	}
 
-	inline Entity* ComponentsGroup<Entity>::getComponent(const int32_t compId)
+	inline EntityProxy* ComponentsGroup<EntityProxy>::getComponent(const int32_t compId)
 	{
 		return dataPos() + (tipOffset + compId) % size;
 	}
 
-	inline Entity* ComponentsGroup<Entity>::getLastComponent() { return getComponent(size - 1); }
+	inline EntityProxy* ComponentsGroup<EntityProxy>::getLastComponent() { return getComponent(size - 1); }
 
-	inline void ComponentsGroup<Entity>::rollClockwise(const int32_t count)
+	inline void ComponentsGroup<EntityProxy>::rollClockwise(const int32_t count)
 	{
 		const int32_t toCopy = min(size, count);
 		const int32_t stride = max(size, count);
-		memcpy(dataPos() + stride, dataPos(), toCopy * sizeof(Entity)); // Roll data
-		tipOffset -= toCopy;						// Decrease tipOffset
-		tipOffset += signMask(tipOffset) * size;			// Wrap around
+		memcpy(dataPos() + stride, dataPos(), toCopy * sizeof(EntityProxy)); // Roll data
+		tipOffset -= toCopy;						     // Decrease tipOffset
+		tipOffset += signMask(tipOffset) * size;			     // Wrap around
 
 		// Should Increase base ptr
 		baseOffset += count;
 	}
 
-	inline void ComponentsGroup<Entity>::rollCounterClockwise(const int32_t count)
+	inline void ComponentsGroup<EntityProxy>::rollCounterClockwise(const int32_t count)
 	{
 		const int32_t dstOffset = min(baseOffset, count);
 		const int32_t toCopy = min(dstOffset, size);
 		const int32_t srcPos = size - toCopy;
-		Entity* dst = dataPos() - dstOffset;
-		Entity* src = dataPos() + srcPos;
-		memcpy(dst, src, toCopy * sizeof(Entity));	    // Roll data
+		EntityProxy* dst = dataPos() - dstOffset;
+		EntityProxy* src = dataPos() + srcPos;
+		memcpy(dst, src, toCopy * sizeof(EntityProxy));	    // Roll data
 		tipOffset += toCopy;				    // Increase tipOffset
 		tipOffset -= signMask(size - tipOffset - 1) * size; // Wrap around
 		baseOffset -= toCopy;				    // Decrease base ptr
 	}
 
-	inline int32_t ComponentsGroup<Entity>::shiftClockwise(int32_t count)
+	inline int32_t ComponentsGroup<EntityProxy>::shiftClockwise(int32_t count)
 	{
 		count = min(count, tipOffset);
 		const int32_t mask = signMask(count - tipOffset - 1);
 		const int32_t shiftCount = (tipOffset - count) * mask;
 		const int32_t rollCount = count * mask;
-		memcpy(dataPos() + size, dataPos(), rollCount * sizeof(Entity));       // Roll data
-		memcpy(dataPos(), dataPos() + rollCount, shiftCount * sizeof(Entity)); // Shift data
+		memcpy(dataPos() + size, dataPos(), rollCount * sizeof(EntityProxy));	    // Roll data
+		memcpy(dataPos(), dataPos() + rollCount, shiftCount * sizeof(EntityProxy)); // Shift data
 		size += count; // Increases size to update end of array
 		return count;  // Returns how many slots left before tip
 	}
 
-	inline Entity* ComponentsGroup<Entity>::dataPos() { return data + baseOffset; }
+	inline EntityProxy* ComponentsGroup<EntityProxy>::dataPos() { return data + baseOffset; }
 
-	inline void ComponentsGroup<Entity>::flushLookupBuffer() { lookupBuffer.empty(); }
+	inline void ComponentsGroup<EntityProxy>::flushLookupBuffer() { (void)lookupBuffer.empty(); }
 
 } // namespace rv
 

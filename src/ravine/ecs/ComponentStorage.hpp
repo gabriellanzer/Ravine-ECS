@@ -29,6 +29,8 @@ namespace rv
 		using GroupMaskPair = typename GroupsMap<TComp>::value_type;
 		template <typename TComp>
 		using GroupIt = typename GroupsMap<TComp>::iterator;
+		template <typename TComp>
+		using GroupCIt = typename GroupsMap<TComp>::const_iterator;
 
 		template <typename TComp>
 		class ComponentStorage : public IComponentStorage
