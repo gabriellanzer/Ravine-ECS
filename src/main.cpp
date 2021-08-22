@@ -64,7 +64,7 @@ void entitiesTest()
 		if (c == 77) // Right Arrow
 		{
 			Entity entity = EntityRegistry::createEntity<Position, Velocity>({0, 1}, {0, velocity});
-			EntityRegistry::lateRemoveEntity(entity);
+			EntityRegistry::removeEntity(entity);
 		}
 		if (c == 75) // Left Arrow
 		{

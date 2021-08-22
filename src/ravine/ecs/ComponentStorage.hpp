@@ -52,7 +52,7 @@ namespace rv
 			 */
 			GroupsRegistry groupsRegistry;
 
-			constexpr ComponentStorage() : capacity(10), data((TComp*)malloc(10 * sizeof(TComp))) {}
+			ComponentStorage() : capacity(10), data((TComp*)malloc(10 * sizeof(TComp))) {}
 
 			~ComponentStorage()
 			{

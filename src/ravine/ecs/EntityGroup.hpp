@@ -111,12 +111,6 @@ namespace rv
 		 * @return EntityProxy* Group start data position ptr.
 		 */
 		inline EntityProxy* dataPos();
-
-		/**
-		 * @brief Cleanup the buffer for a new pass.
-		 *
-		 */
-		inline void flushLookupBuffer();
 	};
 
 	inline void ComponentsGroup<EntityProxy>::addComponent(const EntityProxy* comps, const uint32_t count)
@@ -139,13 +133,13 @@ namespace rv
 		for (int32_t i = 0; i < rightCount; i++)		  // Update EntityProxy IDs
 		{
 			EntityProxy& entity = dst[i];
-			entity.groupId = size + i;
+			entity.groupPos = size + i;
 
 			// TODO: Check if we can keep track only of entities the user wants to
 			// Pay for what you use
 			// if (entity.IsTracked())
 			{
-				lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+				lookupBuffer.push_back({entity.entityId, entity.groupPos});
 			}
 		}
 		dst = dataPos() + tipOffset - leftCount;
@@ -154,13 +148,13 @@ namespace rv
 		for (int32_t i = 0; i < leftCount; i++)	 // Update EntityProxy IDs
 		{
 			EntityProxy& entity = dst[i];
-			entity.groupId = size - leftCount + rightCount + i;
+			entity.groupPos = size - leftCount + rightCount + i;
 
 			// TODO: Check if we can keep track only of entities the user wants to
 			// Pay for what you use
 			// if (entity.IsTracked())
 			{
-				lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+				lookupBuffer.push_back({entity.entityId, entity.groupPos});
 			}
 		}
 		size += rightCount;
@@ -214,13 +208,13 @@ namespace rv
 			for (int32_t i = 0; i < comprCount; i++)
 			{
 				EntityProxy& entity = data[baseOffset + dstPos + i];
-				entity.groupId -= comprShifts;
+				entity.groupPos -= comprShifts;
 
 				// TODO: Check if we can keep track only of entities the user wants to
 				// Pay for what you use
 				// if (entity.IsTracked())
 				{
-					lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+					lookupBuffer.push_back({entity.entityId, entity.groupPos});
 				}
 			}
 		}
@@ -254,13 +248,13 @@ namespace rv
 			for (int32_t i = 0; i < comprCount; i++)
 			{
 				EntityProxy& entity = data[baseOffset + comprShifts + i];
-				entity.groupId -= (comprShifts + leftComprCount);
+				entity.groupPos -= (comprShifts + leftComprCount);
 
 				// TODO: Check if we can keep track only of entities the user wants to
 				// Pay for what you use
 				// if (entity.IsTracked())
 				{
-					lookupBuffer.push_back({entity.uniqueId, entity.groupId});
+					lookupBuffer.push_back({entity.entityId, entity.groupPos});
 				}
 			}
 		}
@@ -319,8 +313,6 @@ namespace rv
 	}
 
 	inline EntityProxy* ComponentsGroup<EntityProxy>::dataPos() { return data + baseOffset; }
-
-	inline void ComponentsGroup<EntityProxy>::flushLookupBuffer() { (void)lookupBuffer.empty(); }
 
 } // namespace rv
 

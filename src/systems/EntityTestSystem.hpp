@@ -13,7 +13,7 @@ class EntityTestSystem : public BaseSystem<EntityProxy, Position>
 	{
 		for (int32_t i = 0; i < size; i++)
 		{
-			fprintf(stdout, "|Ent(%ui)|Pos(%.3f,%.3f)", e[i].uniqueId, p[i].x, p[i].y);
+			fprintf(stdout, "|Ent(%u)|Pos(%.3f,%.3f)", e[i].entityId, p[i].x, p[i].y);
 		}
 	}
 };

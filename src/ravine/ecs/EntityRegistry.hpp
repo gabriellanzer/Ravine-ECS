@@ -1,14 +1,15 @@
 #ifndef ENTITYREGISTRY_HPP
 #define ENTITYREGISTRY_HPP
 
-#include "ComponentStorage.hpp"
-#include "ComponentsGroup.hpp"
 #include "Entity.hpp"
+#include "EntityStorage.hpp"
 #include "TemplateMaskPack.h"
+#include "ravine/ecs/EntityGroup.hpp"
 
 #include <algorithm>
 #include <queue>
 #include <unordered_set>
+#include <vector>
 
 namespace rv
 {
@@ -70,7 +71,7 @@ namespace rv
 		 *
 		 * @param entity The entity to be removed through immediate operations.
 		 */
-		inline static void removeEntity(Entity& entity);
+		inline static void removeEntityImediatelly(Entity& entity);
 
 		/**
 		 * @brief Removes a given entity at the end of the application frame.
@@ -78,13 +79,15 @@ namespace rv
 		 *
 		 * @param entity The entity to be removed through batch operations.
 		 */
-		inline static void lateRemoveEntity(Entity& entity);
+		inline static void removeEntity(Entity& entity);
 
 		/**
 		 * @brief Sorts remove/create entities lists and calls removal operations on the storages.
 		 *
 		 */
 		inline static void flushEntityOperations();
+
+		inline static void patchEntitiesLookup(const std::vector<EntityLookup>& lookupBuf);
 
 	  private:
 		template <class... TComponents>
@@ -176,14 +179,19 @@ namespace rv
 		}
 
 		// Override Entity Registry
-		reg->uniqueId = entity;
-		reg->groupId = -1;
+		reg->entityId = entity;
+		reg->groupPos = -1;
 		reg->compTypes = new intptr_t[sizeof...(TComponents) + 1];
 		reg->typesCount = sizeof...(TComponents) + 1;
 		MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<EntityProxy, TComponents...>();
 		memcpy(reg->compTypes, masks.data(), (sizeof...(TComponents) + 1) * sizeof(intptr_t));
 		EntityProxy proxy = {entity, -1};
 		createComponents<EntityProxy, TComponents...>(masks, proxy, args...);
+
+		// Flush the Entity Proxy storage so we can get updated group positions
+		ComponentStorage<EntityProxy>* storage = ComponentStorage<EntityProxy>::getInstance();
+		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
+
 		return entity;
 	}
 
@@ -208,18 +216,23 @@ namespace rv
 		}
 
 		// Override Entity Registry
-		reg->uniqueId = entity;
-		reg->groupId = -1;
+		reg->entityId = entity;
+		reg->groupPos = -1;
 		reg->compTypes = new intptr_t[sizeof...(TComponents) + 1];
 		reg->typesCount = sizeof...(TComponents) + 1;
 		MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<EntityProxy, TComponents...>();
 		memcpy(reg->compTypes, masks.data(), (sizeof...(TComponents) + 1) * sizeof(intptr_t));
 		EntityProxy proxy = {entity, -1};
 		createComponents<EntityProxy, TComponents...>(masks, proxy);
+
+		// Flush the Entity Proxy storage so we can get updated group positions
+		ComponentStorage<EntityProxy>* storage = ComponentStorage<EntityProxy>::getInstance();
+		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
+
 		return entity;
 	}
 
-	inline void EntityRegistry::removeEntity(Entity& entity)
+	inline void EntityRegistry::removeEntityImediatelly(Entity& entity)
 	{
 		_ASSERT(entity != InvalidEntity);
 
@@ -231,16 +244,23 @@ namespace rv
 		for (int32_t i = 0; i < reg->typesCount; i++)
 		{
 			IComponentStorage* storage = reinterpret_cast<IComponentStorage*>(reg->compTypes[i]);
-			storage->removeComponent(reg->groupId, typeMask);
+			storage->removeComponent(reg->groupPos, typeMask);
 		}
 
+		// Flush the Entity Proxy storage so we can get updated group positions
+		ComponentStorage<EntityProxy>* storage = ComponentStorage<EntityProxy>::getInstance();
+		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
+
+		// Open up an entity registry slot
+		entTableVacancy.push(entity);
+
 		// Set as invalid
-		reg->uniqueId = InvalidEntity;
-		reg->groupId = -1;
+		reg->entityId = InvalidEntity;
+		reg->groupPos = -1;
 		entity = InvalidEntity;
 	}
 
-	inline void EntityRegistry::lateRemoveEntity(Entity& entity)
+	inline void EntityRegistry::removeEntity(Entity& entity)
 	{
 		_ASSERT(entity != InvalidEntity);
 		EntityReg entityReg = entityRegistry[entity];
@@ -253,24 +273,27 @@ namespace rv
 		}
 
 		// Get existing group list or create new one
-		std::vector<int32_t>* groupIds;
+		std::vector<int32_t>* groupPosToRmv;
 		GroupIdList::iterator it = entIdToDestroy.lower_bound(typeMask);
 		if (it != entIdToDestroy.end() && !(entIdToDestroy.key_comp()(typeMask, it->first)))
 		{
-			groupIds = it->second;
+			groupPosToRmv = it->second;
 		}
 		else
 		{
-			groupIds = new std::vector<int32_t>();
-			entIdToDestroy.insert(it, GroupIdPair(typeMask, groupIds));
+			groupPosToRmv = new std::vector<int32_t>();
+			entIdToDestroy.insert(it, GroupIdPair(typeMask, groupPosToRmv));
 		}
 
 		// Add entity group id to remove group
-		groupIds->push_back(entityReg.groupId);
+		groupPosToRmv->push_back(entityReg.groupPos);
+
+		// Open up an entity registry slot
+		entTableVacancy.push(entity);
 
 		// Set as invalid
-		entityReg.uniqueId = InvalidEntity;
-		entityReg.groupId = -1;
+		entityReg.entityId = InvalidEntity;
+		entityReg.groupPos = -1;
 		entity = InvalidEntity;
 	}
 
@@ -290,11 +313,24 @@ namespace rv
 			storage->removeComponents(entIdToDestroy);
 		}
 
+		// Flush the Entity Proxy storage so we can get updated group positions
+		ComponentStorage<EntityProxy>* storage = ComponentStorage<EntityProxy>::getInstance();
+		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
+
 		// Cleanup for next frame
 		entIdToDestroy.clear();
 		storagesToDestroy.clear();
 
 		// TODO Flush late create list
+	}
+
+	inline void EntityRegistry::patchEntitiesLookup(const std::vector<EntityLookup>& lookupBuf)
+	{
+		for (const EntityLookup& lookup : lookupBuf)
+		{
+			EntityReg& reg = entityRegistry[lookup.entityId];
+			reg.groupPos = lookup.groupPos;
+		}
 	}
 
 } // namespace rv
