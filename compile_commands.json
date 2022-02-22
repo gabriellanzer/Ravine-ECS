@@ -1,7 +1,7 @@
 [
 {
-  "directory": "C:/Projects/Personal/Ravine-ECS/build/Debug",
-  "command": "C:\\PROGRA~1\\LLVM11~1.0\\bin\\CLANG_~1.EXE -IC:/Users/gabriel.kannenberg/.conan/data/fmt/7.1.3/_/_/package/174172550201312e0f66f8565052c202e4101455/include -IC:/Users/gabriel.kannenberg/.conan/data/taskflow/3.0.0/_/_/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include -I../../include -I../../src -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd   -I -pthread -std=gnu++17 -o CMakeFiles\\ravine-ecs.dir\\src\\main.cpp.obj -c C:\\Projects\\Personal\\Ravine-ECS\\src\\main.cpp",
-  "file": "C:/Projects/Personal/Ravine-ECS/src/main.cpp"
+  "directory": "D:/Personal/Ravine-ECS/build/Release",
+  "command": "C:\\PROGRA~1\\LLVM11~1.0\\bin\\CLANG_~1.EXE -ID:/Personal/Ravine-ECS/include -ID:/Personal/Ravine-ECS/src -isystem C:/Users/gabriel.kannenberg/.conan/data/fmt/7.1.3/_/_/package/4317cfbceb086c50641da8c3ac3b5f0d03e02efb/include -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -I -pthread -std=gnu++17 -o CMakeFiles\\ravine-ecs.dir\\src\\main.cpp.obj -c D:\\Personal\\Ravine-ECS\\src\\main.cpp",
+  "file": "D:\\Personal\\Ravine-ECS\\src\\main.cpp"
 }
 ]

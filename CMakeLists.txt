@@ -4,8 +4,15 @@ cmake_minimum_required(VERSION 3.1.0)
 project(Ravine-ECS VERSION 0.1.1)
 
 # Configure Conan
-include(${CMAKE_SOURCE_DIR}/build/conanbuildinfo_multi.cmake)
-conan_basic_setup() # Do not change CMAKE output dirs
+include(${CMAKE_SOURCE_DIR}/conan.cmake)
+
+conan_cmake_run(REQUIRES
+				fmt/7.1.3
+				taskflow/3.0.0
+                BASIC_SETUP NO_OUTPUT_DIRS
+				IMPORTS "., license* -> ../../licenses @ folder=True, ignore_case=True"
+				IMPORTS "include, * -> ../../include @ ignore_case=True"
+				CMAKE_TARGETS BUILD missing)
 
 # Configure Includes
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -16,11 +23,11 @@ file(GLOB_RECURSE SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.c*")
 add_executable(ravine-ecs ${SRC_FILES})
 
 # Target for C++ STD Version 2017
-#add_definitions("-std=c++17")
 target_compile_features(ravine-ecs PRIVATE cxx_std_17)
 target_compile_options(ravine-ecs PRIVATE -I -pthread)
-conan_target_link_libraries(ravine-ecs)
 target_link_options(ravine-ecs PRIVATE -mwindows)
+
+target_link_libraries(ravine-ecs CONAN_PKG::fmt)
 
 set_target_properties(
     ravine-ecs
