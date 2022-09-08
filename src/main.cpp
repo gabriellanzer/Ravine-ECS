@@ -9,14 +9,30 @@
 
 using namespace rv;
 
+// Goals:
+// - High-performance low cache-miss storages for an Entity Component System implementation
+// - Pay for what you use implementation of Entity Handles and Archetype Groups Registry
+// - Serialize/Deserialize Entity Handles and Components Array raw data into the disk
+// - Have a Rendering Abstraction API for a 2D Rendering Framework
+
+// TODOs:
+// Remove Entity Storage Implementation and create a class representing entity operations
+// Then apply these operations to the Entity IDs directly (only for tracked Entities)
+// Change Registry to Work with a Graph representation and only store existing Groups
+// Ensure that Groups are storage agnostic and operate on template type pointers only
+// Create compile-time checks for empty-structs entity flags, so they never have a storage
+
 // Tests Forward declaration
 void entitiesTest();
 void performanceTest();
 
+std::set<float> vectorSet;
+
 int main(int argc, char** argv)
 {
-	entitiesTest();
-	// performanceTest();
+	//entitiesTest();
+	performanceTest();
+	vectorSet.clear();
 
 	return 0;
 }
@@ -110,7 +126,10 @@ void performanceTest()
 		auto end = std::chrono::system_clock::now();
 		auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 		double deltaTime = elapsed.count() / 1'000'000.0;
-		fprintf(stdout, "It time %fms\n", deltaTime);
+		if (i % 50 == 0)
+		{
+			fprintf(stdout, "It time %fms\n", deltaTime);
+		}
 		times[i] = deltaTime;
 		acc += deltaTime;
 	}

@@ -19,7 +19,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Configure Executable
 include_directories(${CMAKE_SOURCE_DIR}/src)
-file(GLOB_RECURSE SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.c*")
+file(GLOB_RECURSE SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.c*" "${CMAKE_SOURCE_DIR}/src/*.h*")
 add_executable(ravine-ecs ${SRC_FILES})
 
 # Target for C++ STD Version 2017

@@ -67,6 +67,15 @@ namespace rv
 		inline static Entity createEntity();
 
 		/**
+		 * @brief Creates a component Entity for the given type.
+		 *
+		 * @tparam TComponent Type of the components to create it's entity handle.
+		 * @return Entity An entity that is bound to the created component.
+		 */
+		template <class TComponent>
+		inline static Entity createComponentEntity();
+
+		/**
 		 * @brief Removes a given entity immediately.
 		 *
 		 * @param entity The entity to be removed through immediate operations.
@@ -147,7 +156,8 @@ namespace rv
 	inline void EntityRegistry::createComponents(MaskArray<sizeof...(TComponents)>& masks, TComponents... args)
 	{
 		using expander = int[];
-		expander{0, ((void)(createComponent<TComponents, TComponents...>(masks, args)), 0)...};
+		expander{0, ((void)(createComponent<TComponents, TComponents...>(masks, args)
+		    ), 0)...};
 	}
 
 	template <class EntityReg, class... TComponents>
@@ -230,6 +240,37 @@ namespace rv
 		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
 
 		return entity;
+	}
+
+	template <class TComponent>
+	inline Entity EntityRegistry::createComponentEntity()
+	{
+		// Fetch Registry Entry
+		static Entity componentEntity = InvalidEntity;
+		if (componentEntity != InvalidEntity) return componentEntity;
+
+		EntityReg* reg;
+		if (entTableVacancy.size() > 0)
+		{
+			componentEntity = entTableVacancy.front();
+			entTableVacancy.pop();
+			reg = &entityRegistry[componentEntity];
+			delete reg->compTypes;
+		}
+		else
+		{
+			componentEntity = entityRegistry.size();
+			entityRegistry.push_back(EntityReg());
+			reg = &entityRegistry[componentEntity];
+		}
+
+		// TODO: Create meta-components here
+		reg->entityId = componentEntity;
+		reg->groupPos = -1;
+		reg->compTypes = new intptr_t[0];
+		reg->typesCount = 0;
+
+		return componentEntity;
 	}
 
 	inline void EntityRegistry::removeEntityImediatelly(Entity& entity)

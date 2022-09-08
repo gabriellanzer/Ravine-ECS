@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 namespace rv
 {
@@ -252,9 +253,10 @@ namespace rv
 			for (GroupCIt<EntityProxy> it = groups.cbegin(); it != groups.cend(); it++)
 			{
 				std::vector<EntityLookup>& lookupBuf = it->second->lookupBuffer;
+				//std::cout << "Sorting Lookup Buffer" << lookupBuf.size() << std::endl;
 				std::sort(lookupBuf.begin(), lookupBuf.end());
 				callback(lookupBuf);
-				(void)lookupBuf.empty();
+				lookupBuf.clear();
 			}
 		}
 
