@@ -4,7 +4,8 @@
 #include "Entity.hpp"
 #include "EntityStorage.hpp"
 #include "TemplateMaskPack.h"
-#include "ravine/ecs/EntityGroup.hpp"
+#include "EntityGroup.hpp"
+#include "../Time.h"
 
 #include <algorithm>
 #include <queue>
@@ -171,6 +172,8 @@ namespace rv
 	template <class... TComponents>
 	inline Entity EntityRegistry::createEntity(TComponents... args)
 	{
+		ScopedTimer<TimerMilisseconds, "Test"> timer;
+
 		// Fetch Registry Entry
 		Entity entity;
 		EntityReg* reg;
@@ -187,6 +190,7 @@ namespace rv
 			entityRegistry.push_back(EntityReg());
 			reg = &entityRegistry[entity];
 		}
+		timer.CaptureSample();
 
 		// Override Entity Registry
 		reg->entityId = entity;
@@ -195,12 +199,16 @@ namespace rv
 		reg->typesCount = sizeof...(TComponents) + 1;
 		MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<EntityProxy, TComponents...>();
 		memcpy(reg->compTypes, masks.data(), (sizeof...(TComponents) + 1) * sizeof(intptr_t));
+		timer.CaptureSample();
+
 		EntityProxy proxy = {entity, -1};
 		createComponents<EntityProxy, TComponents...>(masks, proxy, args...);
+		timer.CaptureSample();
 
 		// Flush the Entity Proxy storage so we can get updated group positions
 		ComponentStorage<EntityProxy>* storage = ComponentStorage<EntityProxy>::getInstance();
 		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
+		timer.CaptureSample();
 
 		return entity;
 	}
@@ -208,6 +216,8 @@ namespace rv
 	template <class... TComponents>
 	inline Entity EntityRegistry::createEntity()
 	{
+		ScopedTimer<TimerMilisseconds> timer("");
+
 		// Fetch Registry Entry
 		Entity entity;
 		EntityReg* reg;
@@ -224,6 +234,7 @@ namespace rv
 			entityRegistry.push_back(EntityReg());
 			reg = &entityRegistry[entity];
 		}
+		timer.CaptureSample();
 
 		// Override Entity Registry
 		reg->entityId = entity;
@@ -232,12 +243,16 @@ namespace rv
 		reg->typesCount = sizeof...(TComponents) + 1;
 		MaskArray<sizeof...(TComponents) + 1> masks = getMaskArray<EntityProxy, TComponents...>();
 		memcpy(reg->compTypes, masks.data(), (sizeof...(TComponents) + 1) * sizeof(intptr_t));
+		timer.CaptureSample();
+		
 		EntityProxy proxy = {entity, -1};
 		createComponents<EntityProxy, TComponents...>(masks, proxy);
+		timer.CaptureSample();
 
 		// Flush the Entity Proxy storage so we can get updated group positions
 		ComponentStorage<EntityProxy>* storage = ComponentStorage<EntityProxy>::getInstance();
 		storage->flushEntityLookups(&EntityRegistry::patchEntitiesLookup);
+		timer.CaptureSample();
 
 		return entity;
 	}

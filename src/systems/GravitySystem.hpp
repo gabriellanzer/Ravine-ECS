@@ -1,9 +1,9 @@
 #ifndef GRAVITYSYSTEM_HPP
 #define GRAVITYSYSTEM_HPP
 
-#include "components/Position.h"
-#include "components/Velocity.h"
-#include "ravine/ecs.h"
+#include "Components/Position.h"
+#include "Components/Velocity.h"
+#include "Ravine/Ecs.h"
 
 using namespace rv;
 

@@ -1,2 +1,2 @@
-#include "ecs/BaseSystem.hpp"
-#include "ecs/EntityRegistry.hpp"
+#include "Ecs/BaseSystem.hpp"
+#include "Ecs/EntityRegistry.hpp"

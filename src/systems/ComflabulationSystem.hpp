@@ -1,8 +1,8 @@
 #ifndef COMFLABULATIONSYSTEM_HPP
 #define COMFLABULATIONSYSTEM_HPP
 
-#include "components/Comflabulation.h"
-#include "ravine/ecs.h"
+#include "Components/Comflabulation.h"
+#include "Ravine/Ecs.h"
 
 using namespace rv;
 

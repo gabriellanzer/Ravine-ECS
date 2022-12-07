@@ -1,11 +1,11 @@
 #include <chrono>
 #include <stack>
 
-#include "systems/BoundarySystem.hpp"
-#include "systems/ComflabulationSystem.hpp"
-#include "systems/EntityTestSystem.hpp"
-#include "systems/GravitySystem.hpp"
-#include "systems/MovementSystem.hpp"
+#include "Systems/BoundarySystem.hpp"
+#include "Systems/ComflabulationSystem.hpp"
+#include "Systems/EntityTestSystem.hpp"
+#include "Systems/GravitySystem.hpp"
+#include "Systems/MovementSystem.hpp"
 
 using namespace rv;
 
@@ -32,7 +32,10 @@ int main(int argc, char** argv)
 {
 	//entitiesTest();
 	performanceTest();
+<<<<<<< Updated upstream
 	vectorSet.clear();
+=======
+>>>>>>> Stashed changes
 
 	return 0;
 }
@@ -91,7 +94,7 @@ void entitiesTest()
 
 void performanceTest()
 {
-	size_t entityCount = 10'000'000;
+	size_t entityCount = 100'000;
 	for (int32_t i = 0; i < entityCount; i++)
 	{
 		if (i < entityCount / 2)
